@@ -1,5 +1,5 @@
 'use client';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 import { Studio } from './Studio';
 
@@ -7,10 +7,14 @@ import { Studio } from './Studio';
 export function StudioRoot() {
   const path = usePathname() || '/studio';
   const params = useSearchParams();
-  const router = useRouter();
   const m = /^\/studio\/edit\/([^/]+)/.exec(path);
   let tplId: string | null = null;
   if (m) { try { tplId = decodeURIComponent(m[1]); } catch { tplId = m[1]; } }
-  const navigate = useCallback((href: string, replace?: boolean) => { if (replace) router.replace(href, { scroll: false }); else router.push(href, { scroll: false }); }, [router]);
+  // Studio routes only change the URL (the app lives in the layout), so use the History API, which
+  // Next's router follows. It applies synchronously and in order, unlike router.push, where a slower
+  // server round-trip for /studio/edit/… could land after a later navigation back to the library.
+  const navigate = useCallback((href: string, replace?: boolean) => {
+    if (replace) history.replaceState(null, '', href); else history.pushState(null, '', href);
+  }, []);
   return <Studio route={m ? 'edit' : 'library'} tplId={tplId} cat={params.get('cat')} navigate={navigate} />;
 }

@@ -71,9 +71,15 @@ export class Studio extends Component<StudioProps, StudioState> {
     const h = this.h; removeEventListener('resize', h.resize); removeEventListener('keydown', h.key); removeEventListener('pointermove', h.move); removeEventListener('pointerup', h.up); removeEventListener('pointercancel', h.up); removeEventListener('pagehide', h.unload);
     this.ro?.disconnect(); clearInterval(this.iv); this.flush();
   }
-  componentDidUpdate(prev: StudioProps) {
+  componentDidUpdate(prev: StudioProps, prevState: StudioState) {
     if (prev.route !== this.props.route || prev.tplId !== this.props.tplId || prev.cat !== this.props.cat) this.route();
+    if (prevState.route !== this.state.route || prevState.doc?.name !== this.state.doc?.name || prevState.ready !== this.state.ready) this.title();
     this.tick();
+  }
+  /** Tab title (URL changes inside the studio don't re-run server metadata). */
+  title() {
+    const st = this.state; if (!st.ready) return;
+    document.title = (st.route === 'edit' && st.doc ? 'Editing ' + st.doc.name : 'Template library') + ' — Treats by MMA';
   }
 
   /** Keep canvas size in state, centre the selected page when asked, and detect text overflow. */

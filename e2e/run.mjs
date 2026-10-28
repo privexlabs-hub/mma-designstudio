@@ -153,8 +153,23 @@ async function studio(browser) {
   await page.setInputFiles('#import-in', json); await page.waitForSelector('#canvas-scroll');
   ok(await page.locator('[id^="ab-"]').first().getByText('E2E report title').count() === 1, 'opening a project file restores the edits');
 
+  // regression: a quick switch back to the library must win, even on a slow device
+  { const cdp = await ctx.newCDPSession(page); await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 }); let bad = 0;
+    for (let i = 0; i < 6; i++) {
+      await page.goto(BASE + '/studio', { waitUntil: 'networkidle' }); await page.setInputFiles('#import-in', json); await page.waitForSelector('#canvas-scroll');
+      await page.getByRole('button', { name: 'Templates' }).click(); await page.waitForTimeout(1500);
+      if (!(await page.getByText('Pick a template, make it yours').count()) || new URL(page.url()).pathname !== '/studio') bad++;
+    }
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 }); ok(!bad, 'open project → Templates always lands on the library (6× CPU throttle, 6 runs)'); }
+  // browser history inside the studio
+  await page.goto(BASE + '/studio?cat=documents', { waitUntil: 'networkidle' });
+  await page.locator('[data-tpl="doc:report:cream"] button').first().click(); await page.waitForSelector('#canvas-scroll');
+  ok((await page.title()).startsWith('Editing Report'), 'editor sets the tab title');
+  await page.goBack(); await page.waitForTimeout(800); ok(await page.getByText('Pick a template, make it yours').count() === 1 && page.url().endsWith('?cat=documents'), 'browser Back returns to the library category');
+  await page.goForward(); await page.waitForTimeout(800); ok(await page.locator('#canvas-scroll').count() === 1, 'browser Forward returns to the editor');
+
   // library: search, bulk ZIP, article banner generator
-  await page.getByRole('button', { name: 'Templates' }).click(); await page.waitForSelector('text=Pick a template, make it yours');
+  await page.goto(BASE + '/studio', { waitUntil: 'networkidle' }); await page.waitForSelector('text=Pick a template, make it yours');
   await page.fill('input[type="search"]', 'leaderboard');
   ok(await page.getByText(/^4 templates matching/).count() === 1, 'search finds the 4 leaderboard ads');
   await page.fill('input[type="search"]', '');

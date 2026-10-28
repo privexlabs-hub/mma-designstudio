@@ -49,13 +49,14 @@ reference/prototype/ the original Claude Design files, kept for parity tests
 
 ## Differences from the prototype (deliberate)
 
-- **Stack and routing.** The prototype's hash routes (`#/library/…`, `#/edit/…`) became `/studio?cat=…` and `/studio/edit/<id>`. The studio stays mounted in the `/studio` layout, so the open document and undo history survive switching between library and editor, as before.
+- **Stack and routing.** The prototype's hash routes (`#/library/…`, `#/edit/…`) became `/studio?cat=…` and `/studio/edit/<id>`. The studio stays mounted in the `/studio` layout, so the open document and undo history survive switching between library and editor, as before. Inside the studio, URL changes use the History API (which Next's router follows), so they apply instantly and in order. Back, Forward, reload and deep links all work.
 - **Works offline after first load.** html-to-image, jsPDF, PptxGenJS and JSZip are npm dependencies at the prototype's exact versions, loaded on demand instead of from CDNs. Caprasimo and Figtree are self-hosted. Lucide 0.460.0 icons are self-hosted. The HTML export embeds its fonts instead of linking Google Fonts.
 - **₦ renders in Figtree.** The prototype loaded only the Latin font subset, which has no naira sign. Latin-ext is included here.
 - **Chart icon.** `bar-chart-3` does not exist in Lucide 0.460.0, so it was blank in the prototype too. It is now `chart-column`.
 - **Theme.** It follows the system setting until the user chooses, as the prototype README describes. The prototype saved the theme on first load.
 - **Inputs.** Hex colour fields apply on blur or Enter instead of on every keystroke. Number fields keep what you type while focused, so you can clear and retype. Pending edits are saved when the page is hidden.
 - **Unknown template URLs** show a message and return to the library.
+- **Lighter interface images.** The header, home page, design system, asset previews and library thumbnails use small WebP copies of the logo, monogram and flyer (`public/assets/ui/`, made by `npm run ui-images`). The home page went from about 2.2 MB of images to 76 KB. Downloads, the editor canvas and all exports still use the supplied full-size files.
 - **Mobile and tablet.** These build on the prototype's layout below 900 px (bottom sheets and a tab bar):
   - A floating canvas toolbar holds undo, redo, zoom and preview.
   - The export dialog becomes a bottom sheet on phones.
