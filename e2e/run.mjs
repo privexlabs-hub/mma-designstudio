@@ -17,7 +17,7 @@ const watch = (page, errs) => { page.on('pageerror', (e) => errs.push('pageerror
 
 async function responsive(browser) {
   console.log('\nResponsive sweep — no horizontal page overflow, no runtime errors');
-  const routes = ['/', '/studio', '/studio?cat=platform', '/studio/edit/xpost%3Aproduct', '/studio/edit/tiktok%3Aannounce', '/studio?cat=documents', '/studio?cat=editorial', '/studio/edit/square%3Aannounce', '/studio/edit/doc%3Areport%3Acocoa', '/design-system', '/design-system/storefront', '/playbook', '/voice', '/assets'];
+  const routes = ['/', '/studio', '/studio?cat=platform', '/studio?cat=celebrations', '/studio/edit/xpost%3Awomensday', '/studio/edit/story%3Aeidfitr', '/studio/edit/xpost%3Aproduct', '/studio/edit/tiktok%3Aannounce', '/studio?cat=documents', '/studio?cat=editorial', '/studio/edit/square%3Aannounce', '/studio/edit/doc%3Areport%3Acocoa', '/design-system', '/design-system/storefront', '/playbook', '/voice', '/assets'];
   const widths = [360, 390, 768, 1024, 1440];
   for (const theme of ['light', 'dark']) for (const w of widths) {
     const ctx = await browser.newContext({ viewport: { width: w, height: w < 800 ? 844 : 900 }, colorScheme: theme, hasTouch: w < 800, isMobile: w < 800 });
@@ -172,6 +172,10 @@ async function studio(browser) {
   await page.goto(BASE + '/studio', { waitUntil: 'networkidle' }); await page.waitForSelector('text=Pick a template, make it yours');
   await page.fill('input[type="search"]', 'leaderboard');
   ok(await page.getByText(/^4 templates matching/).count() === 1, 'search finds the 4 leaderboard ads');
+  await page.fill('input[type="search"]', 'christmas tiktok');
+  ok(await page.getByText(/^2 templates matching/).count() === 1, 'multi-word search finds Christmas Eve + Christmas Day on TikTok');
+  await page.fill('input[type="search"]', 'eid story');
+  ok(await page.getByText(/^3 templates matching/).count() === 1, 'search finds the Eid stories (al-Fitr, al-Adha, el-Maulud)');
   await page.fill('input[type="search"]', '');
   await page.getByRole('button', { name: 'Select for bulk export' }).click();
   await page.getByRole('checkbox', { name: /Announcement — Square post/ }).check();

@@ -253,3 +253,51 @@ export const CAROUSELS: Record<string, { name: string; pages: [string, Variant][
   founder:{ name:'Founder story carousel', pages:[['Cover',{ theme:'cream', media:'arch', photo:PH.cake, items:[it('logo'),it('label','Our story'),it('title','How Treats by MMA began')] }],['Belief',{ theme:'cocoa', items:[it('quotemark'),it('quote','Good food brings people together.')] }],['Story',{ theme:'cream', items:[it('label','The beginning'),it('title','[Founding details to confirm]'),it('sub','[Owner to add real story.]')] }],['Values',{ theme:'cream', items:[it('label','What we value'),it('list','Quality in every batch\nWarm, honest service\nBeautiful presentation\nShared joy\nConsistency you can trust')] }],['CTA',{ theme:'cocoa', items:[it('logo'),it('title','Sweet moments, made with care.'),it('handle',HANDLE)] }]] },
   testimonials:{ name:'Testimonials carousel', pages:[['Cover',{ theme:'cocoa', items:[it('logo'),it('title','Kind words from our customers'),it('label','Swipe →')] }],['Review 1',{ theme:'cream', items:[it('quotemark'),it('quote','[Genuine review, with permission]'),it('author','— [Name]')] }],['Review 2',{ theme:'cream', items:[it('quotemark'),it('quote','[Genuine review, with permission]'),it('author','— [Name]')] }],['Review 3',{ theme:'cream', items:[it('quotemark'),it('quote','[Genuine review, with permission]'),it('author','— [Name]')] }],['CTA',{ theme:'cocoa', items:[it('logo'),it('title','Your turn?'),it('cta','Order on WhatsApp')] }]] },
 };
+
+/* ---------- celebrations & observances (added after the prototype) ----------
+   Greetings follow the brand voice (warm, sentence case, no invented offers). Fixed dates appear as
+   the label; Islamic dates and other movable feasts change every year, so none is shown. */
+export type OccasionGroup = 'New month' | 'Christian' | 'Muslim' | 'National day' | 'International day';
+export interface Occasion { key: string; group: OccasionGroup; v: Variant & { name: string } }
+type Look = 'type' | 'arch' | 'ring' | 'full';
+const look = (l: Look, photo: string, items: Item[], name: string): Variant & { name: string } =>
+  l === 'type' ? { name, theme: 'cocoa', align: 'center', items }
+  : l === 'arch' ? { name, theme: 'cream', media: 'arch', photo, items }
+  : l === 'ring' ? { name, theme: 'cocoa', media: 'arch', ring: 1, photo, items }
+  : { name, media: 'full', photo, items: items.filter((i) => i[0] !== 'logo' && i[0] !== 'ribbon') };
+const occ = (key: string, group: OccasionGroup, name: string, l: Look, photo: string, label: string, title: string, sub: string): Occasion => ({
+  key, group, v: look(l, photo, [it('logo'), it('label', label), it('title', title), it('ribbon'), it('sub', sub), it('handle', HANDLE)].filter((i) => l !== 'arch' || i[0] !== 'ribbon'), name),
+});
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTH_LOOKS: [Look, string][] = [['ring', PH.cake], ['arch', PH.pastry], ['type', ''], ['arch', PH.bread], ['ring', PH.donut], ['arch', PH.fura], ['type', ''], ['arch', PH.chops], ['ring', PH.pastry], ['arch', PH.cake], ['type', ''], ['ring', PH.donut]];
+
+export const OCCASIONS: Occasion[] = [
+  ...MONTHS.map((m, i) => occ('newmonth-' + m.toLowerCase(), 'New month', 'Happy new month · ' + m, MONTH_LOOKS[i][0], MONTH_LOOKS[i][1], 'Happy new month', 'Hello, ' + m, 'Wishing you a sweet new month from all of us at Treats by MMA.')),
+  occ('newyearseve', 'Christian', 'New Year’s Eve', 'type', '', 'December 31', 'Cheers to a sweet new year', 'Thank you for celebrating with us this year.'),
+  occ('newyear', 'Christian', 'Happy New Year', 'ring', PH.cake, 'January 1', 'Happy New Year', 'Wishing you a year full of sweet moments.'),
+  occ('palmsunday', 'Christian', 'Palm Sunday', 'type', '', 'Palm Sunday', 'Happy Palm Sunday', 'Wishing you peace and joy this Palm Sunday.'),
+  occ('goodfriday', 'Christian', 'Good Friday', 'type', '', 'Good Friday', 'A blessed Good Friday', 'Wishing you a peaceful and reflective Good Friday.'),
+  occ('easter', 'Christian', 'Happy Easter', 'ring', PH.pastry, 'Easter Sunday', 'Happy Easter', 'Wishing you and your family a joyful Easter.'),
+  occ('eastermonday', 'Christian', 'Easter Monday', 'arch', PH.bread, 'Easter Monday', 'Happy Easter Monday', 'Enjoy the holiday with family, friends and something sweet.'),
+  occ('christmaseve', 'Christian', 'Christmas Eve', 'arch', PH.donut, 'December 24', 'It’s Christmas Eve', 'Wishing you a cosy, joyful night with the people you love.'),
+  occ('christmas', 'Christian', 'Merry Christmas', 'ring', PH.cake, 'December 25 · Season’s greetings', 'Merry Christmas', 'Wishing you joy, love and something sweet this Christmas.'),
+  occ('boxingday', 'Christian', 'Boxing Day', 'arch', PH.chops, 'December 26', 'Happy Boxing Day', 'Here’s to more time with family, friends and treats.'),
+  occ('ramadan', 'Muslim', 'Ramadan Kareem', 'type', '', 'Ramadan', 'Ramadan Kareem', 'Wishing you a blessed and peaceful month of fasting.'),
+  occ('laylatalqadr', 'Muslim', 'Laylat al-Qadr', 'type', '', 'The Night of Power', 'Laylat al-Qadr', 'May this blessed night bring you peace and mercy.'),
+  occ('eidfitr', 'Muslim', 'Eid al-Fitr · Eid Mubarak', 'ring', PH.donut, 'Barka da Sallah · Eid al-Fitr', 'Eid Mubarak', 'Wishing you and your family a joyful Eid al-Fitr.'),
+  occ('eidadha', 'Muslim', 'Eid al-Adha · Eid Mubarak', 'ring', PH.cake, 'Barka da Sallah · Eid al-Adha', 'Eid Mubarak', 'Wishing you and your family a blessed Eid al-Adha.'),
+  occ('islamicnewyear', 'Muslim', 'Islamic New Year', 'type', '', '1 Muharram', 'Happy Islamic New Year', 'Wishing you peace and blessings in the new Hijri year.'),
+  occ('maulud', 'Muslim', 'Eid-el-Maulud', 'type', '', 'Eid-el-Maulud', 'Happy Eid-el-Maulud', 'Wishing you peace and blessings today.'),
+  occ('jumuah', 'Muslim', 'Jumu’ah Mubarak', 'type', '', 'Friday', 'Jumu’ah Mubarak', 'Wishing you a blessed Friday.'),
+  occ('workersday', 'National day', 'Workers’ Day', 'arch', PH.chops, 'May 1', 'Happy Workers’ Day', 'To everyone who works hard to make things happen — thank you.'),
+  occ('childrensday', 'National day', 'Children’s Day', 'arch', PH.donut, 'May 27', 'Happy Children’s Day', 'Celebrating the little ones who make every day sweeter.'),
+  occ('democracyday', 'National day', 'Democracy Day', 'type', '', 'June 12', 'Happy Democracy Day', 'Celebrating Nigeria today and every day.'),
+  occ('independence', 'National day', 'Independence Day', 'ring', PH.chops, 'October 1', 'Happy Independence Day, Nigeria', 'Proudly Nigerian. Wishing everyone a joyful celebration.'),
+  occ('valentine', 'International day', 'Valentine’s Day', 'ring', PH.cake, 'February 14', 'Happy Valentine’s Day', 'Share the love with something sweet.'),
+  occ('womensday', 'International day', 'International Women’s Day', 'arch', PH.pastry, 'March 8', 'Happy International Women’s Day', 'Celebrating the women who make every moment sweeter.'),
+  occ('mothersday', 'International day', 'Mother’s Day', 'ring', PH.cake, 'Mother’s Day', 'Happy Mother’s Day', 'To every mum who makes life sweeter — thank you.'),
+  occ('fathersday', 'International day', 'Father’s Day', 'arch', PH.bread, 'Father’s Day', 'Happy Father’s Day', 'To every dad — thank you for everything.'),
+  occ('teachersday', 'International day', 'World Teachers’ Day', 'type', '', 'October 5', 'Happy World Teachers’ Day', 'Thank you to every teacher shaping tomorrow.'),
+  occ('worldfoodday', 'International day', 'World Food Day', 'full', PH.chops, 'October 16', 'Happy World Food Day', 'Good food brings people together.'),
+  occ('worldbakingday', 'International day', 'World Baking Day', 'full', PH.bread, 'World Baking Day', 'Happy World Baking Day', 'Soft crumb, golden crust, made with care — batch by batch.'),
+];

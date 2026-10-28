@@ -3,6 +3,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { BUILD, CATS, DOCS, TEMPLATES, pageKinds, relayout, newPage, newElement } from '@/lib/studio';
+import { OCCASIONS } from '@/lib/studio/data';
 import type { Doc } from '@/lib/studio';
 
 /* Load the original prototype library (window.TBM) for parity checks. */
@@ -15,13 +16,13 @@ const TBM = sandbox.window.TBM as any;
 const strip = (d: Doc) => JSON.parse(JSON.stringify(d, (k, v) => (k === 'id' ? undefined : typeof v === 'string' && v.startsWith('/assets/') ? v.slice(1) : v)));
 
 describe('template registry', () => {
-  const ORIGINAL = TEMPLATES.filter((t) => t.cat !== 'platform');
+  const ORIGINAL = TEMPLATES.filter((t) => t.cat !== 'platform' && t.cat !== 'celebrations');
   const PLATFORM = TEMPLATES.filter((t) => t.cat === 'platform');
 
   it('keeps the prototype’s 202 templates in the INVENTORY.md category counts', () => {
     expect(ORIGINAL).toHaveLength(202);
     const count = (c: string) => ORIGINAL.filter((t) => t.cat === c).length;
-    expect(CATS.filter(([c]) => c !== 'platform').map(([c]) => count(c))).toEqual([59, 36, 6, 36, 8, 7, 32, 18]);
+    expect(CATS.filter(([c]) => c !== 'platform' && c !== 'celebrations').map(([c]) => count(c))).toEqual([59, 36, 6, 36, 8, 7, 32, 18]);
   });
 
   it('lists the same template ids, names and subtitles as the prototype; sizes extend the prototype’s list', () => {
@@ -76,6 +77,47 @@ describe('template registry', () => {
     expect(r.pages[0].elements.find((e) => e.key === 'title')?.text).toBe('Edited title');
   });
 
+  describe('celebrations & observances', () => {
+    const CEL = TEMPLATES.filter((t) => t.cat === 'celebrations');
+    const FMTS = ['igpost', 'igsquare', 'xpost', 'xsquare', 'fbpost', 'fblandscape', 'tiktok', 'story'];
+    it('has 39 occasions on 8 formats', () => {
+      expect(OCCASIONS).toHaveLength(39);
+      expect(CEL).toHaveLength(312);
+      for (const o of OCCASIONS) expect(CEL.filter((t) => t.id.endsWith(':' + o.key)).map((t) => t.formatId), o.key).toEqual(FMTS);
+      const groups = (g: string) => OCCASIONS.filter((o) => o.group === g).length;
+      expect([groups('New month'), groups('Christian'), groups('Muslim'), groups('National day'), groups('International day')]).toEqual([12, 9, 7, 4, 7]);
+    });
+    it('lays every occasion out inside the page on every format', () => {
+      for (const t of CEL) {
+        const d = BUILD[t.id]();
+        for (const e of d.pages[0].elements) expect(e.x >= 0 && e.y >= 0 && e.x + e.w <= d.w + 1 && e.y + e.h <= d.h + 1 && e.w > 0 && e.h > 0, t.id + ' ' + e.key).toBe(true);
+      }
+    });
+    it('uses platform handles and keeps titles', () => {
+      const el = (id: string, k: string) => BUILD[id]().pages[0].elements.find((e) => e.key === k)?.text;
+      expect(el('tiktok:christmas', 'title')).toBe('Merry Christmas');
+      expect(el('tiktok:christmas', 'handle')).toBe('TikTok @.mmacakeandpastry');
+      expect(el('story:eidfitr', 'handle')).toBe('@treats_by_mma');
+      expect(el('xpost:eidfitr', 'handle')).toBe('[X handle to confirm]');
+      expect(el('igpost:eidadha', 'label')).toBe('Barka da Sallah · Eid al-Adha');
+      expect(el('igsquare:newmonth-march', 'title')).toBe('Hello, March');
+    });
+    it('follows the copy rules: fixed dates shown, no prices or offers, solemn days not “happy”', () => {
+      const all = OCCASIONS.map((o) => JSON.stringify(o.v.items)).join(' ');
+      expect(all).not.toMatch(/₦|price|%|discount|free/i);
+      const lab = (k: string) => OCCASIONS.find((o) => o.key === k)!.v.items.find((i) => i[0] === 'label')![1];
+      expect([lab('newyear'), lab('valentine'), lab('workersday'), lab('childrensday'), lab('democracyday'), lab('independence')]).toEqual(['January 1', 'February 14', 'May 1', 'May 27', 'June 12', 'October 1']);
+      const title = (k: string) => OCCASIONS.find((o) => o.key === k)!.v.items.find((i) => i[0] === 'title')![1] as string;
+      expect(title('goodfriday')).not.toMatch(/happy/i);
+      for (const k of ['ramadan', 'eidfitr', 'eidadha', 'islamicnewyear', 'maulud', 'laylatalqadr']) expect(JSON.stringify(OCCASIONS.find((o) => o.key === k)!.v.items), k).not.toMatch(/\b(19|20)\d\d\b|January|February|March|April|June|July|August|September|October|November|December/);
+    });
+    it('can be inserted as a page in any graphic document', () => {
+      const d = BUILD['square:announce']();
+      expect(pageKinds(d).some(([k]) => k === 'christmas')).toBe(true);
+      expect(newPage(d, 'ramadan').elements.find((e) => e.key === 'title')?.text).toBe('Ramadan Kareem');
+    });
+  });
+
   it('keeps document page kinds from INVENTORY.md', () => {
     expect(Object.keys(DOCS)).toEqual(['ebook', 'report', 'whitepaper', 'proposal', 'casestudy', 'presentation', 'article', 'newsletter', 'resume']);
     expect(DOCS.ebook.seq).toHaveLength(29);
@@ -103,5 +145,19 @@ describe('contrast', () => {
     expect(grade(contrast('#FFFFFF', '#E8358F'))).toBe('AA Large'); // white on icing-500: large text only
     expect(grade(contrast('#E8B323', '#FFF4DC'))).toBe('Fail'); // gold fails on cream
     expect(contrast('#E8B323', '#3D1D10')).toBeGreaterThanOrEqual(7.5); // gold on cocoa (8:1)
+  });
+});
+
+import { displayWidth } from '@/lib/studio/metrics';
+describe('display-word fitting (post-prototype templates)', () => {
+  it('no Caprasimo word is wider than its box on platform or celebration templates, at any platform size', () => {
+    const fmts = ['igpost', 'igsquare', 'xpost', 'xsquare', 'fbpost', 'fblandscape', 'tiktok', 'story'];
+    for (const t of TEMPLATES.filter((x) => x.cat === 'platform' || x.cat === 'celebrations')) {
+      const docs = [BUILD[t.id](), ...fmts.filter((f) => f !== t.formatId).slice(0, 2).map((f) => relayout(BUILD[t.id](), f))];
+      for (const d of docs) for (const e of d.pages[0].elements) {
+        if (e.type !== 'text' || e.font !== 'display' || !e.text) continue;
+        for (const w of e.text.split(/\s+/).filter(Boolean)) expect(displayWidth(w, e.size!, e.ls || 0) <= e.w - 2 * (e.pad || 0), `${t.id} @ ${d.formatId} "${w}"`).toBe(true);
+      }
+    }
   });
 });

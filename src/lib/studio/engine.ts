@@ -6,6 +6,7 @@ import type {
   AvatarSpec, Block, Card, Composed, DocTypeId, Edition, El, Item, ItemOpt, Rect, Theme, ThemeId, Variant,
 } from './types';
 import { DOCS, it } from './data';
+import { displayWidth } from './metrics';
 
 let uid = 0;
 export const nid = (p?: string): string => (p || 'e') + Date.now().toString(36).slice(-4) + (uid++).toString(36);
@@ -236,3 +237,15 @@ export function docPage(dt: DocTypeId, kindId: string, W: number, H: number, ed?
 
 export function isDark(hex: string | undefined): boolean { if (!hex || hex[0] !== '#' || hex.length < 7) return false; const n = parseInt(hex.slice(1, 7), 16); const r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) < 128; }
 export const slug = (s: string): string => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+
+/** Shrink display-font text so its longest word fits the box width (no mid-word breaks).
+    Used by the post-prototype templates; the prototype's own templates are left exactly as designed. */
+export function fitDisplayWords(els: El[]): El[] {
+  for (const e of els) {
+    if (e.type !== 'text' || e.font !== 'display' || !e.text || !e.size) continue;
+    const avail = e.w - 2 * (e.pad || 0);
+    const widest = Math.max(...e.text.split(/\s+/).filter(Boolean).map((w) => displayWidth(e.upper ? w.toUpperCase() : w, e.size as number, e.ls || 0)));
+    if (widest > avail) e.size = Math.max(8, Math.floor(e.size * avail / widest * 0.98));
+  }
+  return els;
+}

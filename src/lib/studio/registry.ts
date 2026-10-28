@@ -1,8 +1,8 @@
 /* Template registry and document operations (relayout, new page, new element).
    Ported from studio-lib.js. Template definitions live here, separate from user edits. */
 import { C, HANDLE, PH } from './brand';
-import { AVATARS, CAROUSELS, DOCS, EMAILS, FORMATS, PAGE_SIZES, V, WEBS } from './data';
-import { CH, I, L, PN, RB, S, T, TB, TH, TOC, avatar, compose, docPage, isDark, nid, stack } from './engine';
+import { AVATARS, CAROUSELS, DOCS, EMAILS, FORMATS, OCCASIONS, PAGE_SIZES, V, WEBS } from './data';
+import { CH, I, L, PN, RB, S, T, TB, TH, TOC, avatar, compose, docPage, fitDisplayWords, isDark, nid, stack } from './engine';
 import type { CatId, Composed, Doc, DocTypeId, El, ElType, Item, Page, Template, Variant } from './types';
 
 export const TEMPLATES: Template[] = [];
@@ -28,12 +28,20 @@ const PLATFORM_FORMATS: [string, string | null][] = [['igpost', null], ['igsquar
 PLATFORM_FORMATS.forEach(([fmt, handle]) => POST_SET.forEach((vk) => {
   const F0 = FORMATS[fmt]; const t: Template = { id: fmt + ':' + vk, name: V[vk].name, cat: 'platform', sub: F0.label + ' · ' + F0.w + ' × ' + F0.h, formatId: fmt, sizes: COMPOSE_FORMATS };
   const spec: string | Variant = handle ? withHandle(V[vk], handle) : vk;
-  reg(t, (f) => { f = f || fmt; return graphicDoc(t, f, [vpage(spec, FORMATS[f].w, FORMATS[f].h)]); });
+  reg(t, (f) => { f = f || fmt; const pg = vpage(spec, FORMATS[f].w, FORMATS[f].h); fitDisplayWords(pg.elements); return graphicDoc(t, f, [pg]); });
 }));
 Object.keys(CAROUSELS).forEach((ck) => {
   const cs = CAROUSELS[ck]; const t: Template = { id: 'carousel:' + ck, name: cs.name, cat: 'social', sub: 'Carousel · ' + cs.pages.length + ' slides · 1080 × 1080', formatId: 'carousel', sizes: ['carousel', 'portrait', 'square'], multi: 1 };
   reg(t, (f) => { f = f || 'carousel'; const { w, h } = FORMATS[f]; return graphicDoc(t, f, cs.pages.map(([nm, v]) => vpage(v, w, h, nm))); });
 });
+/* Celebrations & observances — every occasion on the platform formats plus Story. Occasion designs
+   are also added to V so they can be inserted as pages ("Page type to add") and re-laid out. */
+OCCASIONS.forEach((o) => { V[o.key] = o.v; });
+OCCASIONS.forEach((o) => ([...PLATFORM_FORMATS, ['story', null]] as [string, string | null][]).forEach(([fmt, handle]) => {
+  const F0 = FORMATS[fmt]; const t: Template = { id: fmt + ':' + o.key, name: o.v.name, cat: 'celebrations', sub: o.group + ' · ' + F0.label + ' · ' + F0.w + ' × ' + F0.h, formatId: fmt, sizes: COMPOSE_FORMATS };
+  const spec: string | Variant = handle ? withHandle(o.v, handle) : o.key;
+  reg(t, (f) => { f = f || fmt; const pg = vpage(spec, FORMATS[f].w, FORMATS[f].h); fitDisplayWords(pg.elements); return graphicDoc(t, f, [pg]); });
+}));
 ['xheader', 'licover', 'licompany', 'fbcover', 'fbevent', 'ytbanner', 'twitch', 'podcast', 'nlheader', 'webbanner', 'eventbanner', 'community'].forEach((f) => addSet('banners', f, ['brand', 'promo', 'event']));
 Object.keys(AVATARS).forEach((ak) => { const t: Template = { id: 'avatar:' + ak, name: AVATARS[ak].name, cat: 'avatars', sub: 'Avatar · 400 × 400', formatId: 'avatar', sizes: ['avatar'] }; reg(t, () => { const r = avatar(400, 400, AVATARS[ak]); return graphicDoc(t, 'avatar', [page(t.name, r.bg, r.elements, { spec: ak })]); }); });
 ['adsq', 'adpt', 'adst', 'adlink', 'admrec', 'adleader', 'adsky', 'adbill', 'admob'].forEach((f) => addSet('ads', f, ['adproduct', 'adoffer', 'adcake', 'adplatter']));
@@ -66,7 +74,10 @@ Object.keys(WEBS).forEach((wk) => {
   });
 });
 
-export const CATS: [CatId, string][] = [['social', 'Social posts'], ['platform', 'Platform posts'], ['banners', 'Banners & covers'], ['avatars', 'Avatars'], ['ads', 'Advertising'], ['email', 'Email'], ['web', 'Web'], ['editorial', 'Article & editorial'], ['documents', 'Documents']];
+/** Post-prototype templates get display-word fitting; the prototype's own 202 are left as designed. */
+const FITTED_CATS: CatId[] = ['platform', 'celebrations'];
+const OCCASION_KEYS = new Set(OCCASIONS.map((o) => o.key));
+export const CATS: [CatId, string][] = [['social', 'Social posts'], ['platform', 'Platform posts'], ['celebrations', 'Celebrations'], ['banners', 'Banners & covers'], ['avatars', 'Avatars'], ['ads', 'Advertising'], ['email', 'Email'], ['web', 'Web'], ['editorial', 'Article & editorial'], ['documents', 'Documents']];
 export const ELEMENT_KINDS: Record<ElType, string> = { text: 'Text', image: 'Image', shape: 'Shape', logo: 'Logo / mark', ribbon: 'Ribbon rule', table: 'Table', toc: 'Contents list', chart: 'Bar chart', pageno: 'Page number' };
 
 /* rebuild a single page from its kind/spec at new size, preserving content by key */
@@ -89,11 +100,13 @@ export function relayout(doc: Doc, sizeId: string): Doc {
     pg.elements.forEach((e) => { if (!used[e.id] && e.user) els.push(scaled(e)); });
     return Object.assign({}, pg, { bg: pg.bg, elements: els });
   });
+  if (FITTED_CATS.includes(doc.cat)) out.pages.forEach((pg) => fitDisplayWords(pg.elements));
   return out;
 }
 export function newPage(doc: Doc, kindId: string): Page {
   if (doc.mode === 'doc' && doc.docType) { const D = DOCS[doc.docType], k = D.kinds[kindId]; const pg = docPage(doc.docType, kindId, doc.w, doc.h, doc.edition); return page(k.label, pg.bg, pg.elements, { kind: kindId, numbered: k.numbered !== false, toc: !!k.toc }); }
-  const r = compose(doc.w, doc.h, V[kindId] || V.announce); return page((V[kindId] || V.announce).name, r.bg, r.elements, { spec: kindId });
+  const r = compose(doc.w, doc.h, V[kindId] || V.announce); if (FITTED_CATS.includes(doc.cat) || OCCASION_KEYS.has(kindId)) fitDisplayWords(r.elements);
+  return page((V[kindId] || V.announce).name, r.bg, r.elements, { spec: kindId });
 }
 export function pageKinds(doc: Doc): [string, string][] {
   if (doc.mode === 'doc' && doc.docType) { const ks = DOCS[doc.docType].kinds; return Object.keys(ks).map((k) => [k, ks[k].label]); }

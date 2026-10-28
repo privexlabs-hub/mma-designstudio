@@ -5,7 +5,7 @@ Next.js 15 + TypeScript build of the Claude Design project “Treats Studio” (
 | Route | What it is |
 |---|---|
 | `/` | Hub |
-| `/studio` (`?cat=…`) | Template library: 314 templates in 9 categories, search, bulk ZIP export, article banner generator |
+| `/studio` (`?cat=…`) | Template library: 626 templates in 10 categories, search, bulk ZIP export, article banner generator |
 | `/studio/edit/<template id>` | Editor: pages, layers, canvas, inspector, undo/redo, all exports |
 | `/design-system` | Design system in 12 sections, with all 21 components live |
 | `/design-system/storefront` | Storefront UI kit (home → menu → product → cake request → order bag) |
@@ -61,6 +61,24 @@ A **Platform posts** library tab holds the 16-design post set (the same designs 
 - **Handle lines** use each platform's account from the flyer: Instagram @treats_by_mma, TikTok @.mmacakeandpastry, Facebook "Eze Chinwendu". No X account was supplied, so X posts show `[X handle to confirm]`.
 - **Sizes everywhere.** The new sizes are also offered in every social, banner, ad, web and editorial template's Size menu, after the prototype's own sizes.
 - **TikTok overlays.** The app's buttons and caption cover the right and bottom edges, so check those areas before posting.
+
+## Added after the prototype: celebrations & observances
+
+A **Celebrations** library tab holds 39 occasions, each on the 7 platform formats plus Story (1080×1920). That is 312 templates:
+
+- **New month:** Happy new month, January–December
+- **Christian:** New Year's Eve, New Year's Day, Palm Sunday, Good Friday, Easter Sunday, Easter Monday, Christmas Eve, Christmas Day, Boxing Day
+- **Muslim:** Ramadan Kareem, Laylat al-Qadr, Eid al-Fitr and Eid al-Adha (Eid Mubarak · Barka da Sallah), Islamic New Year, Eid-el-Maulud, Jumu'ah Mubarak
+- **National day (Nigeria):** Workers' Day, Children's Day, Democracy Day, Independence Day
+- **International day:** Valentine's Day, International Women's Day, Mother's Day, Father's Day, World Teachers' Day, World Food Day, World Baking Day
+
+How they work:
+
+- **Dates.** Fixed dates show as the small label. Islamic dates and other movable feasts change every year, so none is printed.
+- **Copy.** Greetings follow the brand voice and contain no offers or prices. Good Friday is worded solemnly. All greeting copy is provisional, like the other sample copy, so review it before publishing.
+- **Handles.** The handle line follows the platform rules described above.
+- **As pages.** Every occasion can also be inserted as a page in any graphic document, from "Page type to add".
+- **Search.** Library search now matches every word you type, in any order, e.g. "christmas tiktok" or "muslim story".
 
 ## Differences from the prototype (deliberate)
 

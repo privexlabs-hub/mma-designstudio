@@ -10,7 +10,10 @@ const GEN_CHANNELS = ['xarticle', 'liarticle', 'lipost', 'medium', 'articlehero'
 export function Library({ app }: { app: Studio }) {
   const st = app.state;
   const q = st.q.trim().toLowerCase();
-  const list = TEMPLATES.filter((t) => q ? (t.name + ' ' + t.sub + ' ' + t.cat).toLowerCase().includes(q) : t.cat === st.cat);
+  // Every typed word must match (name, subtitle or category), e.g. "christmas tiktok".
+  const words = q.split(/\s+/).filter(Boolean);
+  const hay = (t: (typeof TEMPLATES)[number]) => (t.name + ' ' + t.sub + ' ' + t.cat + ' ' + (CATS.find(([c]) => c === t.cat)?.[1] || '')).toLowerCase().replace(/[’']/g, '');
+  const list = TEMPLATES.filter((t) => q ? words.every((w) => hay(t).includes(w.replace(/[’']/g, ''))) : t.cat === st.cat);
   const nb = Object.keys(st.bulk).filter((k) => st.bulk[k]).length;
   const lim = st.limit || 24;
   const phone = st.vw < 560;
