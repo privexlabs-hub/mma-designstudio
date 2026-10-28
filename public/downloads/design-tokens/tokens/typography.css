@@ -1,0 +1,15 @@
+:root{
+--font-display:'Caprasimo','Cooper Black','Georgia',serif;
+--font-body:'Figtree','Avenir Next','Segoe UI',system-ui,sans-serif;
+
+--weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;--weight-black:800;
+
+/* Type scale (desktop) */
+--text-display:72px;--text-h1:52px;--text-h2:38px;--text-h3:28px;--text-h4:22px;
+--text-lg:19px;--text-body:16px;--text-sm:14px;--text-xs:12px;
+--text-price:20px;--text-price-lg:28px;--text-product-name:20px;--text-label:12px;--text-button:16px;
+
+--leading-display:1.02;--leading-heading:1.12;--leading-snug:1.3;--leading-body:1.55;
+--tracking-display:-0.01em;--tracking-heading:0;--tracking-body:0;--tracking-label:0.12em;--tracking-button:0.01em;
+}
+@media (max-width:640px){:root{--text-display:46px;--text-h1:36px;--text-h2:29px;--text-h3:23px;--text-h4:19px;--text-lg:17px;--text-price-lg:24px;--text-product-name:18px}}

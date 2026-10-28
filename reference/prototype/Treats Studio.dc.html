@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/tokens/colors.css">
+<link rel="stylesheet" href="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/tokens/typography.css">
+<link rel="stylesheet" href="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/tokens/base.css">
+<link rel="stylesheet" href="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/styles.css">
+<script src="_ds/treats-by-mma-design-system-b5a371ab-ab85-4dbb-90f8-0b276926c1e6/_ds_bundle.js"></script>
+<script src="studio-lib.js"></script>
+<script src="studio-export.js"></script>
+<style>
+:root{--a-bg:#FFF4DC;--a-surface:#FFFDF6;--a-sunken:#FDE3F0;--a-fg:#3D1D10;--a-fg2:#5A2F1C;--a-border:#F7DC85;--a-canvas:#FFF2F8;--a-accent:#C81F75;--a-link:#AD1660;--a-on:#3D1D10;--a-on-fg:#FFF9EA;--a-scrim:rgba(43,20,10,.4);color-scheme:light}
+[data-theme="dark"]{--a-bg:#1E0D06;--a-surface:#2B140A;--a-sunken:#3D1D10;--a-fg:#FFF4DC;--a-fg2:#EEDFD3;--a-border:#5A2F1C;--a-canvas:#140803;--a-accent:#C81F75;--a-link:#F59AC6;--a-on:#F2C94C;--a-on-fg:#2B140A;--a-scrim:rgba(0,0,0,.6);color-scheme:dark}
+html,body{margin:0;height:100%;background:var(--a-bg);color:var(--a-fg)}
+a{color:var(--a-link)}a:hover{color:var(--a-accent)}
+*:focus-visible{outline:2px solid #C81F75;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;background:var(--a-bg);color:var(--a-fg);font-family:var(--font-body);overflow:hidden">
+<header style="flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 16px;min-height:56px;box-sizing:border-box;background:var(--a-surface);border-bottom:1px solid var(--a-border)">
+<button onClick="{{ goLibrary }}" style="display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;cursor:pointer;color:var(--a-fg)"><img src="assets/logo/proposed-cake-monogram.png" alt="Treats by MMA" style="width:36px;height:36px;border-radius:10px;object-fit:cover"><span style="font-family:var(--font-display);font-size:20px;line-height:1">Treats Studio</span></button>
+<nav style="display:flex;gap:4px">
+<button onClick="{{ goLibrary }}" style="{{ navLib }}">Templates</button>
+<sc-if value="{{ hasDoc }}"><button onClick="{{ goEditor }}" style="{{ navEd }}">Editor</button></sc-if>
+</nav>
+<div style="flex:1"></div>
+<sc-if value="{{ isEdit }}">
+<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<sc-if value="{{ wideHeader }}"><span style="font-weight:700;font-size:14px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ docName }}</span></sc-if>
+<button title="Undo (Ctrl+Z)" disabled="{{ noUndo }}" onClick="{{ undo }}" style="width:36px;height:36px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="undo-2" size="{{ 16 }}" hint-size="16px,16px"></x-import></button>
+<button title="Redo (Ctrl+Shift+Z)" disabled="{{ noRedo }}" onClick="{{ redo }}" style="width:36px;height:36px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="redo-2" size="{{ 16 }}" hint-size="16px,16px"></x-import></button>
+<select aria-label="Zoom" value="{{ zoomVal }}" onChange="{{ onZoom }}" style="height:36px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);padding:0 10px;font:600 13px var(--font-body)">
+<sc-for list="{{ zoomOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.l }}</option></sc-for>
+</select>
+<button onClick="{{ togglePreview }}" style="{{ previewBtn }}"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="eye" size="{{ 16 }}" hint-size="16px,16px"></x-import>Preview</button>
+<x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Button" variant="primary" size="sm" icon="download" on-click="{{ openExport }}" hint-size="110px,36px">Export</x-import>
+</div>
+</sc-if>
+<button onClick="{{ toggleTheme }}" aria-label="{{ themeLabel }}" title="{{ themeLabel }}" style="width:36px;height:36px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="{{ themeIcon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import></button>
+</header>
+
+<sc-if value="{{ notReady }}" hint-placeholder-val="{{ true }}"><div style="flex:1;display:grid;place-items:center;color:var(--a-fg2);font-weight:600">Loading studio…</div></sc-if>
+
+<sc-if value="{{ isLibrary }}">
+<main style="flex:1;overflow:auto">
+<div style="max-width:1360px;margin:0 auto;padding:28px 24px 80px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font:800 12px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-link)">Template library</span><h1 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:clamp(30px,4vw,44px);line-height:1.05;color:var(--a-fg)">Pick a template, make it yours</h1></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<input type="search" placeholder="Search all templates" value="{{ q }}" onInput="{{ onQ }}" aria-label="Search templates" style="height:40px;min-width:220px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);padding:0 16px;font:15px var(--font-body)">
+<button onClick="{{ toggleSelect }}" style="{{ selectBtn }}">{{ selectLabel }}</button>
+<button onClick="{{ triggerImport }}" style="height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)">Open project file</button>
+</div>
+</div>
+<div role="tablist" style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{ catTabs }}" as="c" hint-placeholder-count="8"><button role="tab" aria-selected="{{ c.on }}" onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }} <span style="opacity:.7;font-weight:600">{{ c.count }}</span></button></sc-for>
+</div>
+<sc-if value="{{ selectMode }}">
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:14px;background:var(--a-sunken);border:1px solid var(--a-border)">
+<strong style="font-size:14px">{{ bulkCount }} selected</strong>
+<button onClick="{{ selectAllShown }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 13px var(--font-body);cursor:pointer">Select all shown</button>
+<button onClick="{{ clearBulk }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 13px var(--font-body);cursor:pointer">Clear</button>
+<div style="flex:1"></div>
+<span style="font-size:13px;color:var(--a-fg2)">Download as ZIP:</span>
+<button disabled="{{ noBulk }}" onClick="{{ bulkPng }}" style="height:34px;padding:0 14px;border-radius:999px;border:0;background:#C81F75;color:#fff;font:700 13px var(--font-body);cursor:pointer">PNG</button>
+<button disabled="{{ noBulk }}" onClick="{{ bulkJpg }}" style="height:34px;padding:0 14px;border-radius:999px;border:0;background:#C81F75;color:#fff;font:700 13px var(--font-body);cursor:pointer">JPG</button>
+<button disabled="{{ noBulk }}" onClick="{{ bulkPdf }}" style="height:34px;padding:0 14px;border-radius:999px;border:0;background:#C81F75;color:#fff;font:700 13px var(--font-body);cursor:pointer">PDF</button>
+</div>
+</sc-if>
+<sc-if value="{{ showGen }}">
+<section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px 24px;padding:20px;border-radius:20px;background:var(--a-surface);border:1px solid var(--a-border)">
+<div style="display:flex;flex-direction:column;gap:10px">
+<h2 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:24px">Article banner generator</h2>
+<p style="margin:0;font-size:14px;color:var(--a-fg2);line-height:1.5">Type a title and optional subtitle, choose a layout and channels, then open them in the editor or download them all.</p>
+<label style="display:flex;flex-direction:column;gap:4px;font:700 12px var(--font-body);color:var(--a-fg2)">Article title<input value="{{ genTitle }}" onInput="{{ onGenTitle }}" placeholder="e.g. How to store your celebration cake" style="height:40px;border-radius:12px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 12px;font:15px var(--font-body)"></label>
+<label style="display:flex;flex-direction:column;gap:4px;font:700 12px var(--font-body);color:var(--a-fg2)">Subtitle (optional)<input value="{{ genSub }}" onInput="{{ onGenSub }}" placeholder="One line that tells readers what they will learn" style="height:40px;border-radius:12px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 12px;font:15px var(--font-body)"></label>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Layout</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ genVariants }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Channels</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ genChannels }}" as="g" hint-placeholder-count="8"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+<x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Button" variant="primary" size="sm" icon="pen-line" on-click="{{ genOpen }}" hint-size="150px,36px">Open in editor</x-import>
+<x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Button" variant="secondary" size="sm" icon="download" on-click="{{ genZip }}" hint-size="170px,36px">Download all (ZIP)</x-import>
+</div>
+</div>
+</section>
+</sc-if>
+<div style="font-size:13px;color:var(--a-fg2)">{{ countLabel }}</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:16px">
+<sc-for list="{{ cards }}" as="t" hint-placeholder-count="8">
+<div style="{{ t.cardStyle }}">
+<button onClick="{{ t.open }}" aria-label="{{ t.aria }}" style="height:184px;display:grid;place-items:center;background:var(--a-canvas);border:0;border-radius:14px;cursor:pointer;padding:8px;overflow:hidden">
+<div style="{{ t.box }}"><dc-import name="Artboard" view="{{ t.view }}" hint-size="100%,100%"></dc-import></div>
+</button>
+<div style="display:flex;align-items:flex-start;gap:8px;padding:2px 4px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:700;font-size:15px;line-height:1.25">{{ t.name }}</span><span style="font-size:12px;color:var(--a-fg2);line-height:1.35">{{ t.sub }}</span></div>
+<sc-if value="{{ t.edited }}"><span style="flex:none;font:800 10px var(--font-body);letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#FCF1CC;color:#8F6410">Edited</span></sc-if>
+<sc-if value="{{ t.selectMode }}"><input type="checkbox" checked="{{ t.checked }}" onChange="{{ t.toggle }}" aria-label="{{ t.aria }}" style="width:20px;height:20px;accent-color:#C81F75;flex:none"></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ hasMore }}"><button onClick="{{ showMore }}" style="align-self:center;height:44px;padding:0 22px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:700 14px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)">{{ moreLabel }}</button></sc-if>
+<sc-if value="{{ noResults }}"><div style="padding:48px;text-align:center;color:var(--a-fg2)">No templates match “{{ q }}”.</div></sc-if>
+</div>
+</main>
+</sc-if>
+
+<sc-if value="{{ isEdit }}">
+<div style="flex:1;min-height:0;display:flex;position:relative">
+<sc-if value="{{ showNav }}">
+<aside style="{{ navStyle }}">
+<div style="padding:14px 14px 10px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--a-border)">
+<div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Pages · {{ pageCount }}</span><sc-if value="{{ narrow }}"><button onClick="{{ closePanel }}" style="border:0;background:none;color:var(--a-fg);font:700 13px var(--font-body);cursor:pointer;min-height:44px">Close</button></sc-if></div>
+<sc-if value="{{ hasKinds }}">
+<select aria-label="Page type to add" value="{{ addKind }}" onChange="{{ onAddKind }}" style="height:36px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 8px;font:14px var(--font-body)">
+<sc-for list="{{ kindOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.l }}</option></sc-for>
+</select>
+</sc-if>
+<div style="display:flex;gap:6px">
+<button onClick="{{ addBefore }}" style="flex:1;height:34px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)">+ Before</button>
+<button onClick="{{ addAfter }}" style="flex:1;height:34px;border-radius:999px;border:0;background:#C81F75;color:#fff;font:700 12px var(--font-body);cursor:pointer" style-hover="background:#AD1660">+ After</button>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:4px">
+<sc-for list="{{ navPages }}" as="p" hint-placeholder-count="3">
+<div draggable="true" onDragStart="{{ p.dragStart }}" onDragOver="{{ p.dragOver }}" onDrop="{{ p.drop }}" onDragEnd="{{ p.dragEnd }}" style="{{ p.style }}">
+<button onClick="{{ p.select }}" style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:none;border:0;padding:8px 6px;color:inherit;text-align:left;cursor:pointer;min-height:40px">
+<span style="flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font:800 11px var(--font-body);background:var(--a-sunken);color:var(--a-fg)">{{ p.num }}</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="font:700 13px var(--font-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</span><span style="font-size:11px;color:var(--a-fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.meta }}</span></span>
+</button>
+<sc-if value="{{ p.on }}">
+<div style="display:flex;gap:2px;padding-right:4px">
+<button title="Move up" aria-label="Move page up" onClick="{{ p.up }}" style="width:26px;height:26px;border:0;border-radius:6px;background:none;color:inherit;cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="chevron-up" size="{{ 14 }}" hint-size="14px,14px"></x-import></button>
+<button title="Move down" aria-label="Move page down" onClick="{{ p.down }}" style="width:26px;height:26px;border:0;border-radius:6px;background:none;color:inherit;cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="chevron-down" size="{{ 14 }}" hint-size="14px,14px"></x-import></button>
+<button title="Duplicate" aria-label="Duplicate page" onClick="{{ p.dup }}" style="width:26px;height:26px;border:0;border-radius:6px;background:none;color:inherit;cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="copy" size="{{ 14 }}" hint-size="14px,14px"></x-import></button>
+<button title="Delete" aria-label="Delete page" onClick="{{ p.del }}" style="width:26px;height:26px;border:0;border-radius:6px;background:none;color:inherit;cursor:pointer;display:grid;place-items:center" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="trash-2" size="{{ 14 }}" hint-size="14px,14px"></x-import></button>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<div style="flex:none;max-height:38%;overflow:auto;border-top:1px solid var(--a-border);padding:10px 8px;display:flex;flex-direction:column;gap:2px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2);padding:0 6px 6px">Layers on this page</span>
+<sc-for list="{{ layers }}" as="l" hint-placeholder-count="0">
+<div style="{{ l.style }}">
+<button onClick="{{ l.select }}" style="flex:1;min-width:0;background:none;border:0;color:inherit;text-align:left;padding:6px;cursor:pointer;font:13px var(--font-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><strong style="font-weight:700">{{ l.type }}</strong> {{ l.snip }}</button>
+<button title="Bring forward" aria-label="Bring forward" onClick="{{ l.up }}" style="width:24px;height:24px;border:0;border-radius:6px;background:none;color:inherit;cursor:pointer;display:grid;place-items:center"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="arrow-up" size="{{ 13 }}" hint-size="13px,13px"></x-import></button>
+<button title="Send backward" aria-label="Send backward" onClick="{{ l.down }}" style="width:24px;height:24px;border:0;border-radius:6px;background:none;color:inherit;cursor:pointer;display:grid;place-items:center"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="arrow-down" size="{{ 13 }}" hint-size="13px,13px"></x-import></button>
+</div>
+</sc-for>
+</div>
+</aside>
+</sc-if>
+
+<div id="canvas-scroll" onPointerDown="{{ canvasDown }}" style="flex:1;min-width:0;position:relative;overflow:auto;background:var(--a-canvas)">
+<div style="{{ columnStyle }}">
+<sc-for list="{{ canvasPages }}" as="p" hint-placeholder-count="1">
+<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<sc-if value="{{ p.showLabel }}"><div style="display:flex;align-items:center;gap:8px;font:700 12px var(--font-body);color:var(--a-fg2)"><span>{{ p.label }}</span><button onClick="{{ p.dl }}" title="Download this page as PNG" style="height:24px;padding:0 8px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 11px var(--font-body);cursor:pointer">PNG</button></div></sc-if>
+<div id="{{ p.wrapId }}" style="{{ p.wrapStyle }}"><dc-import name="Artboard" view="{{ p.view }}" hint-size="100%,100%"></dc-import></div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ showInsp }}">
+<aside style="{{ inspStyle }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--a-border)">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">{{ inspTitle }}</span>
+<div style="display:flex;gap:6px">
+<sc-if value="{{ hasEl }}"><button onClick="{{ deselect }}" style="border:0;background:none;color:var(--a-link);font:700 12px var(--font-body);cursor:pointer;min-height:32px">Page settings</button></sc-if>
+<sc-if value="{{ narrow }}"><button onClick="{{ closePanel }}" style="border:0;background:none;color:var(--a-fg);font:700 13px var(--font-body);cursor:pointer;min-height:44px">Close</button></sc-if>
+</div>
+</div>
+<div style="flex:1;min-height:0;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:18px">
+
+<sc-if value="{{ hasEl }}">
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button onClick="{{ dupEl }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer;display:flex;align-items:center;gap:6px" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="copy" size="{{ 14 }}" hint-size="14px,14px"></x-import>Duplicate</button>
+<button onClick="{{ toFront }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)">To front</button>
+<button onClick="{{ toBack }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)">To back</button>
+<button onClick="{{ delEl }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid #8E0F4F;background:transparent;color:#8E0F4F;font:700 12px var(--font-body);cursor:pointer;display:flex;align-items:center;gap:6px"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="trash-2" size="{{ 14 }}" hint-size="14px,14px"></x-import>Delete</button>
+</div>
+
+<sc-if value="{{ hasTextField }}">
+<label style="display:flex;flex-direction:column;gap:6px;font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">{{ textLabel }}
+<textarea id="insp-text" value="{{ elText }}" onInput="{{ onText }}" rows="{{ textRows }}" style="resize:vertical;border-radius:12px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:10px;font:400 14px/1.5 var(--font-body);letter-spacing:0;text-transform:none"></textarea>
+<span style="font:400 12px var(--font-body);letter-spacing:0;text-transform:none;color:var(--a-fg2)">{{ textHint }}</span>
+</label>
+<sc-if value="{{ overflow }}"><div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:#FDE3F0;color:#8E0F4F;font-size:13px;line-height:1.4"><strong>Text is overflowing this box.</strong><span>Enlarge the box, reduce the size, or move the extra paragraphs to a new page.</span><button onClick="{{ flow }}" style="align-self:flex-start;height:32px;padding:0 12px;border-radius:999px;border:0;background:#8E0F4F;color:#fff;font:700 12px var(--font-body);cursor:pointer">Flow overflow to new page</button></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isTextEl }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Typography</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<select aria-label="Font" value="{{ fontVal }}" onChange="{{ onFont }}" style="height:36px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 8px;font:14px var(--font-body)"><option value="display">Caprasimo (display)</option><option value="body">Figtree (body)</option></select>
+<select aria-label="Weight" value="{{ weightVal }}" onChange="{{ onWeight }}" style="height:36px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 8px;font:14px var(--font-body)"><option value="400">Regular 400</option><option value="500">Medium 500</option><option value="600">Semibold 600</option><option value="700">Bold 700</option><option value="800">Black 800</option></select>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px">
+<sc-for list="{{ typoFields }}" as="f" hint-placeholder-count="0"><label style="display:flex;flex-direction:column;gap:3px;font:700 11px var(--font-body);color:var(--a-fg2)">{{ f.label }}<input type="number" step="{{ f.step }}" value="{{ f.val }}" onChange="{{ f.on }}" style="height:34px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 8px;font:14px var(--font-body);width:100%;box-sizing:border-box"></label></sc-for>
+</div>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ alignSegs }}" as="g" hint-placeholder-count="0"><button title="{{ g.title }}" aria-label="{{ g.title }}" onClick="{{ g.onClick }}" style="{{ g.style }}"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="{{ g.icon }}" size="{{ 16 }}" hint-size="16px,16px"></x-import></button></sc-for></div>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ textToggles }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isImgEl }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Image</span>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ photos }}" as="ph" hint-placeholder-count="0"><button onClick="{{ ph.pick }}" title="{{ ph.name }}" aria-label="{{ ph.name }}" style="{{ ph.style }}"><img src="{{ ph.src }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></button></sc-for></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button onClick="{{ uploadImg }}" style="height:34px;padding:0 12px;border-radius:999px;border:0;background:#C81F75;color:#fff;font:700 12px var(--font-body);cursor:pointer;display:flex;align-items:center;gap:6px"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="upload" size="{{ 14 }}" hint-size="14px,14px"></x-import>Upload / replace</button>
+<button onClick="{{ clearImg }}" style="height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer">Empty placeholder</button>
+</div>
+<span style="font-size:12px;color:var(--a-fg2);line-height:1.4">Brand photos are conceptual crops from the original flyer — replace with real product photography before publishing.</span>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ frameSegs }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ imgToggles }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLogoEl }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Logo</span>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ logoSegs }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+<span style="font-size:12px;color:var(--a-fg2);line-height:1.4">The official logo is raster with a cream ground — it always sits on a cream tile. The monogram crop is provisional.</span>
+</div>
+</sc-if>
+
+<sc-for list="{{ swatchGroups }}" as="sg" hint-placeholder-count="0">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">{{ sg.label }}</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+<sc-for list="{{ sg.items }}" as="sw" hint-placeholder-count="0"><button onClick="{{ sw.onClick }}" title="{{ sw.title }}" aria-label="{{ sw.title }}" style="{{ sw.style }}"></button></sc-for>
+<input aria-label="{{ sg.inputLabel }}" value="{{ sg.value }}" onChange="{{ sg.onInput }}" style="width:84px;height:28px;border-radius:8px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 6px;font:12px ui-monospace,monospace">
+</div>
+</div>
+</sc-for>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Position & size (px)</span>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+<sc-for list="{{ posFields }}" as="f" hint-placeholder-count="0"><label style="display:flex;flex-direction:column;gap:3px;font:700 11px var(--font-body);color:var(--a-fg2)">{{ f.label }}<input type="number" step="{{ f.step }}" value="{{ f.val }}" onChange="{{ f.on }}" style="height:34px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 6px;font:13px var(--font-body);width:100%;box-sizing:border-box"></label></sc-for>
+</div>
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ alignPage }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="height:30px;padding:0 10px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer">{{ g.label }}</button></sc-for></div>
+<label style="display:flex;align-items:center;gap:10px;font:700 12px var(--font-body);color:var(--a-fg2)">Opacity<input type="range" min="0.1" max="1" step="0.05" value="{{ opacity }}" onInput="{{ onOpacity }}" style="flex:1;accent-color:#C81F75"></label>
+</div>
+</sc-if>
+
+<sc-if value="{{ noEl }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Add element</span>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><sc-for list="{{ addEls }}" as="a" hint-placeholder-count="9"><button onClick="{{ a.onClick }}" style="min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:12px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="{{ a.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import>{{ a.label }}</button></sc-for></div>
+</div>
+
+<sc-if value="{{ isEditorial }}">
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;background:var(--a-sunken)">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Article</span>
+<input aria-label="Article title" value="{{ artTitle }}" onInput="{{ onArtTitle }}" placeholder="Article title" style="height:38px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 10px;font:14px var(--font-body)">
+<input aria-label="Article subtitle" value="{{ artSub }}" onInput="{{ onArtSub }}" placeholder="Subtitle (optional)" style="height:38px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 10px;font:14px var(--font-body)">
+</div>
+</sc-if>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">This page</span>
+<input aria-label="Page name" value="{{ pageName }}" onInput="{{ onPageName }}" style="height:36px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 10px;font:14px var(--font-body)">
+<div style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ pageToggles }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for></div>
+</div>
+
+<sc-for list="{{ pageSwatches }}" as="sg" hint-placeholder-count="0">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">{{ sg.label }}</span>
+<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><sc-for list="{{ sg.items }}" as="sw" hint-placeholder-count="0"><button onClick="{{ sw.onClick }}" title="{{ sw.title }}" aria-label="{{ sw.title }}" style="{{ sw.style }}"></button></sc-for><input aria-label="{{ sg.inputLabel }}" value="{{ sg.value }}" onChange="{{ sg.onInput }}" style="width:84px;height:28px;border-radius:8px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 6px;font:12px ui-monospace,monospace"></div>
+</div>
+</sc-for>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">Document</span>
+<label style="display:flex;flex-direction:column;gap:4px;font:700 12px var(--font-body);color:var(--a-fg2)">Name<input value="{{ docName }}" onInput="{{ onDocName }}" style="height:36px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 10px;font:14px var(--font-body)"></label>
+<label style="display:flex;flex-direction:column;gap:4px;font:700 12px var(--font-body);color:var(--a-fg2)">Size / aspect ratio<select value="{{ sizeVal }}" onChange="{{ onSize }}" style="height:36px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 8px;font:14px var(--font-body)"><sc-for list="{{ sizeOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select></label>
+<span style="font-size:12px;color:var(--a-fg2)">{{ exportDims }}</span>
+<sc-if value="{{ isDocMode }}">
+<div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+<button onClick="{{ togglePN }}" style="{{ pnStyle }}">Page numbers</button>
+<label style="display:flex;flex-direction:column;gap:3px;font:700 11px var(--font-body);color:var(--a-fg2)">Start at<input type="number" value="{{ pnStart }}" onChange="{{ onPnStart }}" style="width:70px;height:32px;border-radius:10px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);padding:0 8px;font:13px var(--font-body)"></label>
+<button onClick="{{ regenToc }}" style="height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);font:600 12px var(--font-body);cursor:pointer" style-hover="background:var(--a-sunken)">Update contents page</button>
+</div>
+</sc-if>
+<button onClick="{{ resetTpl }}" style="align-self:flex-start;height:34px;padding:0 12px;border-radius:999px;border:1px solid #8E0F4F;background:transparent;color:#8E0F4F;font:700 12px var(--font-body);cursor:pointer;display:flex;align-items:center;gap:6px;margin-top:4px"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="rotate-ccw" size="{{ 14 }}" hint-size="14px,14px"></x-import>Reset template to original</button>
+</div>
+</sc-if>
+</div>
+</aside>
+</sc-if>
+
+<sc-if value="{{ narrow }}">
+<nav style="position:absolute;left:0;right:0;bottom:0;display:flex;background:var(--a-surface);border-top:1px solid var(--a-border);z-index:5">
+<sc-for list="{{ mobileTabs }}" as="m" hint-placeholder-count="3"><button onClick="{{ m.onClick }}" style="{{ m.style }}"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="{{ m.icon }}" size="{{ 18 }}" hint-size="18px,18px"></x-import>{{ m.label }}</button></sc-for>
+</nav>
+</sc-if>
+</div>
+</sc-if>
+
+<div aria-hidden="true" style="position:fixed;left:-200000px;top:0;pointer-events:none">
+<sc-for list="{{ offPages }}" as="p" hint-placeholder-count="0"><dc-import name="Artboard" view="{{ p }}" hint-size="10px,10px"></dc-import></sc-for>
+</div>
+
+<input type="file" accept="image/*" id="file-in" onChange="{{ onFile }}" style="display:none">
+<input type="file" accept="application/json,.json" id="import-in" onChange="{{ onImport }}" style="display:none">
+
+<sc-if value="{{ exportOpen }}">
+<div onClick="{{ closeExport }}" style="position:fixed;inset:0;background:var(--a-scrim);z-index:20;display:grid;place-items:center;padding:16px">
+<div role="dialog" aria-modal="true" aria-label="Export" onClick="{{ stop }}" style="width:min(560px,100%);max-height:90vh;overflow:auto;background:var(--a-surface);color:var(--a-fg);border-radius:20px;border:1px solid var(--a-border);box-shadow:0 16px 36px -12px rgba(30,13,6,.4);padding:22px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2 style="margin:0;font-family:var(--font-display);font-weight:400;font-size:26px">Export</h2><button onClick="{{ closeExport }}" aria-label="Close" style="width:40px;height:40px;border-radius:999px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);cursor:pointer;display:grid;place-items:center"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="x" size="{{ 18 }}" hint-size="18px,18px"></x-import></button></div>
+<p style="margin:0;font-size:13px;color:var(--a-fg2);line-height:1.5">{{ exportNote }}</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font:700 12px var(--font-body);color:var(--a-fg2)">Image scale</span><sc-for list="{{ scaleSegs }}" as="g" hint-placeholder-count="0"><button onClick="{{ g.onClick }}" style="{{ g.style }}">{{ g.label }}</button></sc-for><label style="display:flex;align-items:center;gap:6px;font:700 12px var(--font-body);color:var(--a-fg2);margin-left:8px">JPG quality<input type="range" min="0.5" max="1" step="0.02" value="{{ jpgQ }}" onInput="{{ onJpgQ }}" style="width:90px;accent-color:#C81F75"></label></div>
+<sc-for list="{{ exportGroups }}" as="g" hint-placeholder-count="0">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span style="font:800 11px var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--a-fg2)">{{ g.title }}</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
+<sc-for list="{{ g.items }}" as="x" hint-placeholder-count="0"><button onClick="{{ x.onClick }}" style="min-height:56px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:8px 12px;border-radius:12px;border:1px solid var(--a-border);background:var(--a-bg);color:var(--a-fg);cursor:pointer;text-align:left" style-hover="border-color:#C81F75"><span style="font:700 14px var(--font-body)">{{ x.label }}</span><span style="font:12px var(--font-body);color:var(--a-fg2)">{{ x.sub }}</span></button></sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBusy }}"><div role="status" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:999px;background:#3D1D10;color:#FFF9EA;font:700 14px var(--font-body);box-shadow:0 16px 36px -12px rgba(30,13,6,.4)"><x-import component-from-global-scope="TreatsByMMADesignSystem_b5a371.Icon" name="loader" size="{{ 16 }}" hint-size="16px,16px"></x-import>{{ busy }}</div></sc-if>
+<sc-if value="{{ hasToast }}"><div role="status" style="{{ toastStyle }}">{{ toastMsg }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { ready:false, theme:'light', route:'library', cat:'social', q:'', doc:null, selPage:0, selEl:null, zoomMode:'fit', canvasW:800, canvasH:600, vw:1200, panel:'canvas', preview:false, exportOpen:false, exporting:false, busy:'', toast:null, selectMode:false, bulk:{}, gen:{ title:'', sub:'', variant:'edcocoa', ch:{ xarticle:1, liarticle:1, lipost:1, medium:1, articlehero:1, blogpromo:1, nlpromo:1 } }, addKind:'', overflow:false, offDoc:null, scale:1, jpgQ:0.92, dragOver:null, hist:[], fut:[] };
+  scrollRef = React.createRef(); fileRef = React.createRef(); importRef = React.createRef(); thumbs = {}; lastHist = 0; saved = {};
+
+  componentDidMount() {
+    const t = localStorage.getItem('tbm-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); this.applyTheme(t);
+    try { this.saved = JSON.parse(localStorage.getItem('tbm-studio:v1') || '{}'); } catch (e) { this.saved = {}; }
+    this.h = { resize:() => this.setState({ vw:innerWidth }), key:(e) => this.key(e), hash:() => this.route(), move:(e) => this.dragMove(e), up:() => this.dragEnd() };
+    addEventListener('resize', this.h.resize); addEventListener('keydown', this.h.key); addEventListener('hashchange', this.h.hash); addEventListener('pointermove', this.h.move); addEventListener('pointerup', this.h.up);
+    const wait = () => (window.TBM && window.TBMX) ? (this.setState({ ready:true, vw:innerWidth }), this.route()) : setTimeout(wait, 40); wait();
+    this.iv = setInterval(() => { try { this.tick(); } catch (e) { this.tickErr = String(e); } }, 150); window.__studio = this;
+  }
+  componentWillUnmount() { const h = this.h; removeEventListener('resize', h.resize); removeEventListener('keydown', h.key); removeEventListener('hashchange', h.hash); removeEventListener('pointermove', h.move); removeEventListener('pointerup', h.up); this.ro && this.ro.disconnect(); clearInterval(this.iv); }
+  componentDidUpdate() { this.tick(); }
+  tick() {
+    const sc = document.getElementById('canvas-scroll');
+    if (sc && sc !== this.roEl) { this.ro && this.ro.disconnect(); this.roEl = sc; this.ro = new ResizeObserver(() => { const w = sc.clientWidth, h = sc.clientHeight; if (Math.abs(w - this.state.canvasW) > 2 || Math.abs(h - this.state.canvasH) > 2) { this.pendingCenter = true; this.setState({ canvasW:w, canvasH:h }); } }); this.ro.observe(sc); }
+    if (sc && sc.clientWidth && (Math.abs(sc.clientWidth - this.state.canvasW) > 2 || Math.abs(sc.clientHeight - this.state.canvasH) > 2)) { this.pendingCenter = true; this.setState({ canvasW:sc.clientWidth, canvasH:sc.clientHeight }); return; }
+    if (this.pendingCenter && sc) { this.pendingCenter = false; const sm = this.pendingSmooth; this.pendingSmooth = false; setTimeout(() => this.center(sm), 60); }
+    const el = this.curEl(); let of = false; if (el && el.type === 'text') { const n = document.getElementById('el-' + el.id); if (n) of = n.scrollHeight > n.clientHeight + 2; }
+    if (of !== this.state.overflow) this.setState({ overflow:of });
+  }
+  route() {
+    const h = decodeURIComponent(location.hash.slice(1)); const TBM = window.TBM;
+    if (h.startsWith('/edit/')) { const id = h.slice(6); if (TBM.BUILD[id]) { if (!this.state.doc || this.state.doc.tpl !== id) this.openTpl(id, true); else this.setState({ route:'edit' }); return; } }
+    const cat = h.startsWith('/library/') ? h.slice(9) : this.state.cat; this.setState({ route:'library', cat:TBM.CATS.some((c) => c[0] === cat) ? cat : 'social' });
+  }
+  applyTheme(t) { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('tbm-theme', t); } catch (e) {} this.setState({ theme:t }); }
+  toast(msg, kind) { clearTimeout(this.tt); this.setState({ toast:{ msg, kind } }); this.tt = setTimeout(() => this.setState({ toast:null }), 4200); }
+  openTpl(id, fromHash) {
+    const doc = this.saved[id] ? JSON.parse(JSON.stringify(this.saved[id])) : window.TBM.BUILD[id]();
+    const kinds = window.TBM.pageKinds(doc);
+    this.setState({ route:'edit', doc, selPage:0, selEl:null, hist:[], fut:[], preview:false, panel:'canvas', addKind:kinds.length ? kinds[0][0] : '' });
+    if (!fromHash) location.hash = '#/edit/' + encodeURIComponent(id); this.pendingCenter = true;
+  }
+  persist(d) { clearTimeout(this.pt); this.pt = setTimeout(() => { this.saved[d.tpl] = d; delete this.thumbs[d.tpl]; this.writeSaved(); }, 250); }
+  writeSaved() { try { localStorage.setItem('tbm-studio:v1', JSON.stringify(this.saved)); } catch (e) { this.toast('Browser storage is full — export a project file (JSON) to keep your work.', 'error'); } }
+  mut(fn, mode) { mode = mode || 'hist'; const prev = this.state.doc; const d = JSON.parse(JSON.stringify(prev)); fn(d);
+    const push = mode === 'hist' || (mode === 'coalesce' && Date.now() - this.lastHist > 900); if (mode === 'coalesce') this.lastHist = Date.now();
+    this.setState((s) => ({ doc:d, hist:push ? s.hist.slice(-60).concat([prev]) : s.hist, fut:push ? [] : s.fut })); this.persist(d); return d; }
+  undo() { const s = this.state; if (!s.hist.length) return; const prev = s.hist[s.hist.length - 1]; this.setState({ doc:prev, hist:s.hist.slice(0, -1), fut:[s.doc].concat(s.fut), selEl:null, selPage:Math.min(s.selPage, prev.pages.length - 1) }); this.persist(prev); }
+  redo() { const s = this.state; if (!s.fut.length) return; const nx = s.fut[0]; this.setState({ doc:nx, fut:s.fut.slice(1), hist:s.hist.concat([s.doc]), selEl:null, selPage:Math.min(s.selPage, nx.pages.length - 1) }); this.persist(nx); }
+  curPage() { const d = this.state.doc; return d && d.pages[this.state.selPage]; }
+  curEl() { const p = this.curPage(); return p && this.state.selEl ? p.elements.find((e) => e.id === this.state.selEl) : null; }
+  zoom() { const s = this.state, d = s.doc; if (!d) return 1; if (s.zoomMode !== 'fit') return +s.zoomMode; const pad = s.vw < 900 ? 24 : 64; return Math.max(0.05, Math.min((s.canvasW - pad) / d.w, (s.canvasH - pad - (s.vw < 900 ? 60 : 30)) / d.h, 2)); }
+  center(smooth) { const sc = document.getElementById('canvas-scroll'), pg = this.curPage(); if (!sc || !pg) return; const w = document.getElementById('pw-' + pg.id); if (!w) return;
+    const top = Math.max(0, w.offsetTop - (sc.clientHeight - w.offsetHeight) / 2), left = Math.max(0, w.offsetLeft - (sc.clientWidth - w.offsetWidth) / 2);
+    const far = Math.abs(sc.scrollTop - top) > sc.clientHeight * 2.5 || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    sc.scrollTo({ top, left, behavior:smooth && !far ? 'smooth' : 'auto' }); }
+  goPage(i) { this.setState({ selPage:i, selEl:null, panel:this.state.vw < 900 ? 'canvas' : this.state.panel }); this.pendingCenter = true; this.pendingSmooth = true; }
+  updEl(patch, mode) { const { selPage, selEl } = this.state; this.mut((d) => { const e = d.pages[selPage].elements.find((x) => x.id === selEl); if (e) Object.assign(e, typeof patch === 'function' ? patch(e) : patch); }, mode); }
+  updPage(patch, mode) { const i = this.state.selPage; this.mut((d) => Object.assign(d.pages[i], patch), mode); }
+  pageNum(d, i) { const pn = d.pageNumbers || {}; if (!pn.show || d.pages[i].numbered === false) return null; return (+pn.start || 1) + i; }
+
+  key(e) { const s = this.state; if (s.route !== 'edit' || !s.doc) return; const t = e.target, typing = t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.isContentEditable); const mod = e.metaKey || e.ctrlKey;
+    if (e.key === 'Escape') { if (s.exportOpen) this.setState({ exportOpen:false }); else if (s.preview) this.setState({ preview:false }); else this.setState({ selEl:null }); return; }
+    if (typing) return;
+    if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? this.redo() : this.undo(); return; } if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); this.redo(); return; }
+    if (!s.selEl) { if (e.key === 'PageDown' || e.key === 'PageUp') { e.preventDefault(); const n = Math.max(0, Math.min(s.doc.pages.length - 1, s.selPage + (e.key === 'PageDown' ? 1 : -1))); this.goPage(n); } return; }
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); this.delEl(); return; }
+    if (mod && e.key.toLowerCase() === 'd') { e.preventDefault(); this.dupEl(); return; }
+    const st = e.shiftKey ? 10 : 1, mv = { ArrowLeft:[-st,0], ArrowRight:[st,0], ArrowUp:[0,-st], ArrowDown:[0,st] }[e.key]; if (mv) { e.preventDefault(); this.updEl((x) => ({ x:x.x + mv[0], y:x.y + mv[1] }), 'coalesce'); }
+  }
+  startDrag(e, pi, id, mode) { const s = this.state; if (s.preview || e.button) return; e.stopPropagation(); const el = s.doc.pages[pi].elements.find((x) => x.id === id); if (!el) return;
+    if (s.selEl !== id || s.selPage !== pi) this.setState({ selPage:pi, selEl:id }); this.drag = { mode, pi, id, sx:e.clientX, sy:e.clientY, o:{ x:el.x, y:el.y, w:el.w, h:el.h }, z:this.zoom(), moved:false }; }
+  dragMove(e) { const g = this.drag; if (!g) return; const dx = (e.clientX - g.sx) / g.z, dy = (e.clientY - g.sy) / g.z; if (!g.moved && Math.abs(dx) + Math.abs(dy) < 3 / g.z) return;
+    if (!g.moved) { g.moved = true; this.mut(() => {}, 'hist'); }
+    const prev = this.state.doc; const d = JSON.parse(JSON.stringify(prev)); const el = d.pages[g.pi].elements.find((x) => x.id === g.id); if (!el) return;
+    if (g.mode === 'move') { el.x = Math.round(g.o.x + dx); el.y = Math.round(g.o.y + dy); } else { el.w = Math.max(8, Math.round(g.o.w + dx)); el.h = Math.max(8, Math.round(g.o.h + dy)); }
+    this.setState({ doc:d }); this.persist(d); }
+  dragEnd() { this.drag = null; }
+
+  dupEl() { const { selPage, selEl } = this.state; let nid; this.mut((d) => { const els = d.pages[selPage].elements, i = els.findIndex((x) => x.id === selEl); if (i < 0) return; const c = JSON.parse(JSON.stringify(els[i])); c.id = nid = window.TBM.nid(); c.x += 24; c.y += 24; c.key = c.key + '-copy'; c.user = true; els.splice(i + 1, 0, c); }); setTimeout(() => this.setState({ selEl:nid }), 0); }
+  delEl() { const { selPage, selEl } = this.state; this.mut((d) => { d.pages[selPage].elements = d.pages[selPage].elements.filter((x) => x.id !== selEl); }); this.setState({ selEl:null }); }
+  zEl(id, dir) { const i = this.state.selPage; this.mut((d) => { const els = d.pages[i].elements, k = els.findIndex((x) => x.id === id); if (k < 0) return; const [e] = els.splice(k, 1); const n = dir === 'top' ? els.length : dir === 'bottom' ? 0 : Math.max(0, Math.min(els.length, k + (dir === 'up' ? 1 : -1))); els.splice(n, 0, e); }); }
+  addEl(type) { const s = this.state, d = s.doc, pg = this.curPage(); const el = window.TBM.newElement(type, d, pg); this.mut((dd) => dd.pages[s.selPage].elements.push(el)); this.setState({ selEl:el.id, panel:s.vw < 900 ? 'edit' : s.panel }); }
+  addPage(before) { const s = this.state, TBM = window.TBM; const at = before ? s.selPage : s.selPage + 1; let pg;
+    if (s.addKind) pg = TBM.newPage(s.doc, s.addKind); else { pg = JSON.parse(JSON.stringify(this.curPage())); pg.id = TBM.nid('p'); pg.elements.forEach((e) => e.id = TBM.nid()); pg.name += ' copy'; }
+    this.mut((d) => d.pages.splice(at, 0, pg)); this.setState({ selPage:at, selEl:null }); this.pendingCenter = true; this.pendingSmooth = true; this.toast('Page added: ' + pg.name, 'ok'); }
+  dupPage(i) { const TBM = window.TBM; this.mut((d) => { const c = JSON.parse(JSON.stringify(d.pages[i])); c.id = TBM.nid('p'); c.elements.forEach((e) => e.id = TBM.nid()); c.name += ' copy'; d.pages.splice(i + 1, 0, c); }); this.setState({ selPage:i + 1, selEl:null }); this.pendingCenter = true; this.pendingSmooth = true; }
+  delPage(i) { if (this.state.doc.pages.length < 2) { this.toast('A document needs at least one page.', 'error'); return; } this.mut((d) => d.pages.splice(i, 1)); this.setState((s) => ({ selPage:Math.min(i, s.doc.pages.length - 1), selEl:null })); this.pendingCenter = true; this.toast('Page deleted — Undo to restore.', 'ok'); }
+  movePage(from, to) { if (from == null || to == null || from === to || to < 0 || to >= this.state.doc.pages.length) return; this.mut((d) => { const [p] = d.pages.splice(from, 1); d.pages.splice(to, 0, p); }); this.setState({ selPage:to, dragOver:null }); this.pendingCenter = true; this.pendingSmooth = true; }
+  regenToc() { this.mut((d) => { const rows = []; d.pages.forEach((p, i) => { if (!p.toc) return; const h = p.elements.find((e) => e.key === 'title') || p.elements.find((e) => e.key === 'heading'); const lab = p.elements.find((e) => e.key === 'label'); let t = ((h && h.text) || p.name).replace(/\n/g, ' '); if (lab && /^(chapter|part|section)/i.test(lab.text)) t = lab.text + ' — ' + t; const n = this.pageNum(d, i); rows.push(t + '|' + (n == null ? '' : n)); });
+    let found = 0; d.pages.forEach((p) => p.elements.forEach((e) => { if (e.type === 'toc') { e.text = rows.join('\n'); found++; } })); if (!found) setTimeout(() => this.toast('No contents page in this document — add one from the page menu.', 'error'), 0); }); this.toast('Contents updated from pages marked “In contents”.', 'ok'); }
+  flow() { const s = this.state, el = this.curEl(), pg = this.curPage(); if (!el) return; const box = document.getElementById('el-' + el.id), tx = document.getElementById('tx-' + el.id); if (!box || !tx) return;
+    let sep = el.text.includes('\n\n') ? '\n\n' : el.text.includes('\n') ? '\n' : ' '; const parts = el.text.split(sep); const rest = []; const orig = tx.textContent;
+    while (parts.length > 1 && box.scrollHeight > box.clientHeight + 2) { rest.unshift(parts.pop()); tx.textContent = parts.join(sep); }
+    tx.textContent = orig; if (!rest.length) { this.toast('Could not split further — enlarge the box or shorten a paragraph.', 'error'); return; }
+    const TBM = window.TBM, top = Math.min.apply(null, pg.elements.filter((e) => e.type !== 'pageno').map((e) => e.y)); const np = JSON.parse(JSON.stringify(pg)); np.id = TBM.nid('p'); np.name = pg.name + ' (cont.)'; np.toc = false;
+    np.elements = np.elements.filter((e) => e.id === el.id || e.type === 'pageno').map((e) => Object.assign(e, { id:TBM.nid() })); const ne = np.elements.find((e) => e.type === 'text'); ne.text = rest.join(sep); ne.h = el.y + el.h - top; ne.y = top;
+    const i = s.selPage; this.mut((d) => { d.pages[i].elements.find((e) => e.id === el.id).text = parts.join(sep); d.pages.splice(i + 1, 0, np); }); this.setState({ selPage:i + 1, selEl:ne.id }); this.pendingCenter = true; this.pendingSmooth = true; this.toast(rest.length + ' paragraph(s) moved to a new page.', 'ok'); }
+  setSize(id) { const nd = window.TBM.relayout(this.state.doc, id); this.mut((d) => { Object.keys(nd).forEach((k) => d[k] = nd[k]); }); this.setState({ selEl:null }); this.pendingCenter = true; }
+  resetTpl() { if (!confirm('Reset “' + this.state.doc.name + '” to its original template? Your edits will be cleared (you can still Undo).')) return; const d0 = window.TBM.BUILD[this.state.doc.tpl](); this.mut((d) => { Object.keys(d).forEach((k) => delete d[k]); Object.assign(d, d0); }); delete this.saved[d0.tpl]; this.setState({ selPage:0, selEl:null }); this.pendingCenter = true; setTimeout(() => { delete this.saved[d0.tpl]; delete this.thumbs[d0.tpl]; this.writeSaved(); }, 300); this.toast('Template reset to original.', 'ok'); }
+  setArticle(key, v) { this.mut((d) => d.pages.forEach((p) => p.elements.forEach((e) => { if (e.key === key) e.text = v; })), 'coalesce'); }
+  readImage(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const m = 1800, sc = Math.min(1, m / Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.88)); }; im.onerror = rej; im.src = r.result; }; r.onerror = rej; r.readAsDataURL(file); }); }
+
+  frames(ms) { return new Promise((r) => setTimeout(r, (ms || 40) + 30)); }
+  async imgsReady(prefix, doc) { const imgs = []; doc.pages.forEach((p) => { const n = document.getElementById(prefix + p.id); if (n) imgs.push(...n.querySelectorAll('img')); }); await Promise.all(imgs.map((i) => i.complete ? Promise.resolve() : new Promise((r) => { i.onload = i.onerror = r; }))); await (document.fonts ? document.fonts.ready : null); }
+  nodes(prefix, doc) { doc = doc || this.state.doc; return doc.pages.map((p) => document.getElementById((prefix || 'ab-') + p.id)); }
+  async run(label, fn) { this.setState({ busy:label + '…', exporting:true, exportOpen:false }); await this.frames(60); try { await this.imgsReady('ab-', this.state.doc); await fn(); this.toast(label + ' — download started.', 'ok'); } catch (e) { console.error(e); this.toast('Export failed: ' + (e && e.message || e), 'error'); } this.setState({ busy:'', exporting:false }); }
+  async exportPage(i, type) { const X = window.TBMX, d = this.state.doc; await this.run(type.toUpperCase() + ' page ' + (i + 1), async () => { const b = await X.capture(this.nodes()[i], d, type, this.state.scale, this.state.jpgQ); X.save(b, X.fname(d, 'p' + String(i + 1).padStart(2, '0'), type === 'jpeg' ? 'jpg' : type)); }); }
+  async exportZip(type) { const X = window.TBMX, d = this.state.doc; await this.run('All pages (' + type.toUpperCase() + ' ZIP)', async () => { const ns = this.nodes(), files = []; for (let i = 0; i < ns.length; i++) files.push({ name:X.fname(d, 'p' + String(i + 1).padStart(2, '0'), type === 'jpeg' ? 'jpg' : type), blob:await X.capture(ns[i], d, type, this.state.scale, this.state.jpgQ) }); await X.zipOf(files, X.fname(d, 'pages', 'zip')); }); }
+  async bulk(type, ids) { const X = window.TBMX, TBM = window.TBM; ids = ids || Object.keys(this.state.bulk).filter((k) => this.state.bulk[k]); if (!ids.length) return; const files = [];
+    this.setState({ busy:'Exporting ' + ids.length + ' template(s)…', exporting:true });
+    try { for (let n = 0; n < ids.length; n++) { const id = ids[n]; const doc = this.saved[id] || TBM.BUILD[id](); this.setState({ offDoc:doc, busy:'Exporting ' + (n + 1) + ' of ' + ids.length + '…' }); await this.frames(60); await this.imgsReady('off-', doc); const ns = this.nodes('off-', doc);
+        if (type === 'pdf') files.push({ name:X.fname(doc, '', 'pdf'), blob:await X.pdf(doc, ns, true) });
+        else for (let i = 0; i < ns.length; i++) files.push({ name:X.fname(doc, ns.length > 1 ? 'p' + String(i + 1).padStart(2, '0') : '', type === 'jpeg' ? 'jpg' : type), blob:await X.capture(ns[i], doc, type, 1, this.state.jpgQ) }); }
+      await X.zipOf(files, 'treats-by-mma_templates_' + new Date().toISOString().slice(0, 10) + '.zip'); this.toast(files.length + ' file(s) zipped — download started.', 'ok');
+    } catch (e) { console.error(e); this.toast('Bulk export failed: ' + (e && e.message || e), 'error'); }
+    this.setState({ busy:'', exporting:false, offDoc:null }); }
+  genDocs() { const g = this.state.gen, TBM = window.TBM; const ids = Object.keys(g.ch).filter((k) => g.ch[k]).map((f) => f + ':' + g.variant); if (!ids.length) { this.toast('Choose at least one channel.', 'error'); return []; }
+    ids.forEach((id) => { const d = this.saved[id] || TBM.BUILD[id](); d.pages.forEach((p) => p.elements.forEach((e) => { if (e.key === 'title' && g.title.trim()) e.text = g.title.trim(); if (e.key === 'sub') e.text = g.sub.trim(); })); if (!g.sub.trim()) d.pages.forEach((p) => { p.elements = p.elements.filter((e) => e.key !== 'sub'); }); this.saved[id] = d; delete this.thumbs[id]; }); this.writeSaved(); return ids; }
+
+  sw(cur, pick, none) { const TBM = window.TBM; const list = (none ? [''] : []).concat(TBM.SWATCHES); return list.map((c) => ({ title:c || 'None', onClick:() => pick(c), style:{ width:28, height:28, borderRadius:999, cursor:'pointer', padding:0, background:c || 'repeating-linear-gradient(45deg,#fff 0 4px,#F59AC6 4px 6px)', border:'1px solid rgba(61,29,16,.25)', boxShadow:(cur || '').toUpperCase() === c.toUpperCase() ? '0 0 0 2px var(--a-surface), 0 0 0 4px #C81F75' : 'none' } })); }
+  swGroup(label, cur, pick, none) { return { label, value:cur || '', inputLabel:label + ' hex value', onInput:(e) => { const v = e.target.value.trim(); if (/^#[0-9a-f]{6}$/i.test(v) || (none && v === '') || v === 'transparent') pick(v); else this.toast('Use a 6-digit hex value like #3D1D10.', 'error'); }, items:this.sw(cur, pick, none) }; }
+  seg(on) { return { height:32, minWidth:32, padding:'0 10px', borderRadius:999, border:'1px solid var(--a-border)', cursor:'pointer', font:'600 12px var(--font-body)', display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6, background:on ? 'var(--a-on)' : 'var(--a-surface)', color:on ? 'var(--a-on-fg)' : 'var(--a-fg)' }; }
+
+  elView(el, pg, pi, d, z, inter, sel) {
+    const TBM = window.TBM, F = TBM.FONTS;
+    const box = { position:'absolute', left:el.x, top:el.y, width:el.w, height:el.h, opacity:el.opacity == null ? 1 : el.opacity, boxSizing:'border-box', cursor:inter && !this.state.preview ? 'move' : undefined, touchAction:inter ? 'none' : undefined };
+    const v = { domId:inter ? 'el-' + el.id : undefined, txId:inter ? 'tx-' + el.id : undefined, box, sel:sel && !this.state.exporting };
+    if (inter) { v.onDown = (e) => this.startDrag(e, pi, el.id, 'move'); v.onResize = (e) => this.startDrag(e, pi, el.id, 'resize'); v.onDbl = () => { this.setState({ panel:'edit' }); setTimeout(() => { const t = document.getElementById('insp-text'); t && t.focus(); }, 50); }; }
+    if (v.sel) { v.selStyle = { position:'absolute', inset:0, outline:(2 / z) + 'px solid #C81F75', outlineOffset:(1 / z) + 'px', pointerEvents:'none' }; v.handle = { position:'absolute', right:-7 / z, bottom:-7 / z, width:14 / z, height:14 / z, borderRadius:999, background:'#fff', border:(2 / z) + 'px solid #C81F75', boxSizing:'border-box', cursor:'nwse-resize', touchAction:'none' }; }
+    const tStyle = (e) => ({ fontFamily:e.font === 'display' ? F.display : F.body, fontSize:e.size, color:e.color, lineHeight:e.lh || 1.4, letterSpacing:(e.ls || 0) + 'em' });
+    if (el.type === 'text' || el.type === 'pageno') {
+      let text = el.text; if (el.type === 'pageno') { const n = this.pageNum(d, pi); text = n == null ? '' : el.text.replace('{n}', n); }
+      Object.assign(box, { display:'flex', flexDirection:'column', justifyContent:el.valign === 'center' ? 'center' : el.valign === 'bottom' ? 'flex-end' : 'flex-start', background:el.bg || 'transparent', borderRadius:el.radius, padding:el.pad || 0, overflow:'hidden' });
+      v.isText = true; v.text = text; v.inner = Object.assign(tStyle(el), { fontWeight:el.weight, textAlign:el.align, textTransform:el.upper ? 'uppercase' : 'none', fontStyle:el.italic ? 'italic' : 'normal', whiteSpace:'pre-wrap', overflowWrap:'break-word', hyphens:el.align === 'justify' ? 'auto' : 'manual', textWrap:el.align === 'justify' ? 'wrap' : 'pretty' });
+    } else if (el.type === 'image') {
+      const r = el.radius || 0; const br = el.frame === 'arch' ? (el.w / 2) + 'px ' + (el.w / 2) + 'px ' + r + 'px ' + r + 'px / ' + Math.min(el.w / 2, el.h - r) + 'px ' + Math.min(el.w / 2, el.h - r) + 'px ' + r + 'px ' + r + 'px' : el.frame === 'circle' ? '50%' : el.frame === 'round' ? r : 0;
+      const rw = Math.max(3, Math.round(Math.min(el.w, el.h) * 0.018));
+      Object.assign(box, { borderRadius:br, overflow:'hidden', boxShadow:el.ring ? '0 0 0 ' + rw + 'px ' + pg.bg + ', 0 0 0 ' + (rw * 2) + 'px ' + el.ring : 'none' });
+      if (el.src) { v.isImg = true; v.src = el.src; v.imgStyle = { width:'100%', height:'100%', objectFit:el.fit || 'cover', display:'block', pointerEvents:'none' }; }
+      else { v.isPh = true; v.ph = { width:'100%', height:'100%', display:'grid', placeItems:'center', background:'#FDE3F0', color:'#AD1660', fontFamily:F.body, fontWeight:700, fontSize:Math.max(11, Math.min(el.w, el.h) * 0.08), border:Math.max(1, el.w * 0.006) + 'px dashed #F59AC6', boxSizing:'border-box', borderRadius:'inherit' }; }
+      if (el.scrim) { v.scrim = true; v.scrimStyle = { position:'absolute', inset:0, background:'linear-gradient(to top, rgba(43,20,10,.9) 0%, rgba(43,20,10,.6) 38%, rgba(43,20,10,0) 72%)', pointerEvents:'none' }; }
+    } else if (el.type === 'shape') { Object.assign(box, { background:el.fill, borderRadius:el.radius, border:el.stroke ? el.strokeW + 'px solid ' + el.stroke : 'none' }); }
+    else if (el.type === 'logo') { Object.assign(box, { background:el.tile, borderRadius:el.radius, overflow:'hidden' }); v.isImg = true; v.src = el.variant === 'mark' ? TBM.MARK : TBM.LOGO; v.imgStyle = { width:'100%', height:'100%', objectFit:el.variant === 'mark' ? 'cover' : 'contain', display:'block', pointerEvents:'none' }; }
+    else if (el.type === 'ribbon') { Object.assign(box, { display:'flex', alignItems:'center', gap:el.h * 0.3 }); v.isRibbon = true; v.rib = { line:{ flex:1, height:Math.max(1.5, el.h * 0.09), background:el.color, borderRadius:2 }, heart:{ color:el.color, fontSize:el.h * 0.8, lineHeight:1, fontFamily:'Arial, sans-serif' } }; }
+    else if (el.type === 'table' || el.type === 'toc' || el.type === 'chart') {
+      v.isRows = true; Object.assign(box, { overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:el.type === 'chart' ? 'space-around' : 'flex-start' }); const base = tStyle(el); const lines = String(el.text || '').split('\n').filter((l) => l.trim());
+      if (el.type === 'table') v.rows = lines.map((l, i) => ({ style:{ display:'flex', borderBottom:(i === 0 ? 2 : 1) + 'px solid ' + (i === 0 ? el.head : el.line) }, cells:l.split('|').map((c) => ({ text:c.trim(), style:Object.assign({}, base, { flex:1, minWidth:0, padding:(el.size * 0.55) + 'px ' + (el.size * 0.5) + 'px', fontWeight:i === 0 ? 800 : 400, color:i === 0 ? el.head : el.color, lineHeight:1.35 }) })) }));
+      else if (el.type === 'toc') v.rows = lines.map((l) => { const [a, b] = l.split('|'); return { style:{ display:'flex', alignItems:'baseline', gap:8, padding:(el.size * 0.45) + 'px 0' }, cells:[{ text:(a || '').trim(), style:Object.assign({}, base, { flex:'0 1 auto', fontWeight:600, lineHeight:1.3 }) }, { text:'', style:{ flex:1, borderBottom:'2px dotted ' + el.color, opacity:0.35, minWidth:20, transform:'translateY(-4px)' } }, { text:(b || '').trim(), style:Object.assign({}, base, { flex:'none', fontWeight:800 }) }] }; });
+      else { const rows = lines.map((l) => { const i = l.lastIndexOf(':'); return [l.slice(0, i).trim(), parseFloat(l.slice(i + 1)) || 0]; }); const mx = Math.max(1, ...rows.map((r) => r[1])); v.rows = rows.map(([lab, val]) => ({ style:{ display:'flex', alignItems:'center', gap:el.size * 0.8 }, cells:[{ text:lab, style:Object.assign({}, base, { width:'30%', fontWeight:700, lineHeight:1.2 }) }, { text:'', style:{ flex:1, height:el.size * 1.5, background:el.track, borderRadius:999, overflow:'hidden', position:'relative' }, fill:{ width:(val / mx * 100) + '%', height:'100%', background:el.bar, borderRadius:999 } }, { text:String(val), style:Object.assign({}, base, { width:'10%', textAlign:'right', fontWeight:800 }) }] })); }
+    }
+    return v;
+  }
+  artView(d, pg, pi, z, inter, prefix) { const s = this.state, selPg = inter && s.selPage === pi && !s.preview;
+    return { domId:prefix + pg.id, style:{ position:'relative', width:d.w, height:d.h, background:pg.bg, overflow:'hidden', transform:z === 1 ? 'none' : 'scale(' + z + ')', transformOrigin:'0 0', fontFamily:window.TBM.FONTS.body, userSelect:'none', WebkitUserSelect:'none' },
+      els:pg.elements.map((el) => this.elView(el, pg, pi, d, z, inter, selPg && s.selEl === el.id)), onDown:inter ? (e) => { if (e.button) return; this.setState({ selPage:pi, selEl:null }); } : undefined }; }
+  thumb(t) { const c = this.thumbs[t.id]; if (c) return c; const d = this.saved[t.id] || window.TBM.BUILD[t.id](); const z = Math.min(216 / d.w, 168 / d.h);
+    return (this.thumbs[t.id] = { view:this.artView(d, d.pages[0], 0, z, false, 'th-'), box:{ width:Math.round(d.w * z), height:Math.round(d.h * z), overflow:'hidden', borderRadius:4, boxShadow:'0 4px 14px -4px rgba(30,13,6,.3)', flex:'none' }, pages:d.pages.length }); }
+
+  renderVals() {
+    const s = this.state, TBM = window.TBM, narrow = s.vw < 900;
+    const pill = (on) => ({ height:36, padding:'0 14px', borderRadius:999, border:'1px solid ' + (on ? 'transparent' : 'var(--a-border)'), background:on ? 'var(--a-on)' : 'transparent', color:on ? 'var(--a-on-fg)' : 'var(--a-fg)', font:'700 14px var(--font-body)', cursor:'pointer' });
+    const V = { notReady:!s.ready, narrow, themeIcon:s.theme === 'dark' ? 'sun' : 'moon', themeLabel:s.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode', toggleTheme:() => this.applyTheme(s.theme === 'dark' ? 'light' : 'dark'),
+      goLibrary:() => { location.hash = '#/library/' + s.cat; }, goEditor:() => { if (s.doc) location.hash = '#/edit/' + encodeURIComponent(s.doc.tpl); }, hasDoc:!!s.doc, isLibrary:s.ready && s.route === 'library', isEdit:s.ready && s.route === 'edit' && !!s.doc,
+      navLib:pill(s.route === 'library'), navEd:pill(s.route === 'edit'), isBusy:!!s.busy, busy:s.busy, hasToast:!!s.toast, toastMsg:s.toast ? s.toast.msg : '',
+      toastStyle:{ position:'fixed', right:16, bottom:narrow ? 80 : 24, zIndex:31, maxWidth:380, padding:'12px 16px', borderRadius:14, font:'600 14px/1.4 var(--font-body)', boxShadow:'0 16px 36px -12px rgba(30,13,6,.4)', background:s.toast && s.toast.kind === 'error' ? '#FDE3F0' : '#DDF3E2', color:s.toast && s.toast.kind === 'error' ? '#8E0F4F' : '#1E6B3A' },
+      fileRef:this.fileRef, importRef:this.importRef, scrollRef:this.scrollRef, stop:(e) => e.stopPropagation(), offPages:[],
+      onFile:async (e) => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; try { const src = await this.readImage(f); this.updEl({ src }); this.toast('Image replaced.', 'ok'); } catch (er) { this.toast('Could not read that image.', 'error'); } },
+      onImport:async (e) => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; try { const d = JSON.parse(await f.text()); if (!d.tpl || !TBM.BUILD[d.tpl] || !Array.isArray(d.pages)) throw new Error('bad'); this.saved[d.tpl] = d; delete this.thumbs[d.tpl]; this.writeSaved(); this.openTpl(d.tpl); this.toast('Project opened: ' + d.name, 'ok'); } catch (er) { this.toast('That file is not a Treats Studio project.', 'error'); } },
+      triggerImport:() => document.getElementById('import-in').click() };
+    if (!s.ready) return V;
+    if (s.offDoc) V.offPages = s.offDoc.pages.map((p, i) => this.artView(s.offDoc, p, i, 1, false, 'off-'));
+
+    if (s.route === 'library') {
+      const q = s.q.trim().toLowerCase(); const list = TBM.TEMPLATES.filter((t) => q ? (t.name + ' ' + t.sub + ' ' + t.cat).toLowerCase().includes(q) : t.cat === s.cat);
+      V.q = s.q; V.onQ = (e) => this.setState({ q:e.target.value }); V.noResults = !list.length;
+      V.catTabs = TBM.CATS.map(([id, label]) => ({ label, count:TBM.TEMPLATES.filter((t) => t.cat === id).length, on:!q && s.cat === id, onClick:() => { this.setState({ q:'', limit:24 }); location.hash = '#/library/' + id; }, style:pill(!q && s.cat === id) }));
+      V.countLabel = list.length + ' template' + (list.length === 1 ? '' : 's') + (q ? ' matching “' + s.q + '”' : '') + ' · click to open in the editor';
+      V.selectMode = s.selectMode; V.selectLabel = s.selectMode ? 'Done selecting' : 'Select for bulk export'; V.selectBtn = pill(s.selectMode); V.toggleSelect = () => this.setState({ selectMode:!s.selectMode });
+      const nb = Object.keys(s.bulk).filter((k) => s.bulk[k]).length; V.bulkCount = nb; V.noBulk = nb === 0;
+      V.selectAllShown = () => { const b = Object.assign({}, s.bulk); list.forEach((t) => b[t.id] = true); this.setState({ bulk:b }); }; V.clearBulk = () => this.setState({ bulk:{} });
+      V.bulkPng = () => this.bulk('png'); V.bulkJpg = () => this.bulk('jpeg'); V.bulkPdf = () => this.bulk('pdf');
+      const lim = s.limit || 24; V.hasMore = list.length > lim; V.moreLabel = 'Show ' + Math.min(24, list.length - lim) + ' more of ' + (list.length - lim); V.showMore = () => this.setState({ limit:lim + 24 });
+      V.cards = list.slice(0, lim).map((t) => { const th = this.thumb(t); const ck = !!s.bulk[t.id]; return { name:t.name, sub:t.sub, aria:'Open ' + t.name + ' — ' + t.sub, edited:!!this.saved[t.id], view:th.view, box:th.box, open:() => s.selectMode ? this.setState({ bulk:Object.assign({}, s.bulk, { [t.id]:!ck }) }) : this.openTpl(t.id), selectMode:s.selectMode, checked:ck, toggle:() => this.setState({ bulk:Object.assign({}, s.bulk, { [t.id]:!ck }) }),
+        cardStyle:{ display:'flex', flexDirection:'column', gap:10, padding:8, borderRadius:20, background:'var(--a-surface)', border:'1px solid ' + (ck ? '#C81F75' : 'var(--a-border)'), boxShadow:ck ? '0 0 0 2px #C81F75' : '0 1px 2px rgba(61,29,16,.08)' } }; });
+      V.showGen = !q && s.cat === 'editorial';
+      if (V.showGen) { const g = s.gen; const setG = (p) => this.setState({ gen:Object.assign({}, g, p) });
+        V.genTitle = g.title; V.genSub = g.sub; V.onGenTitle = (e) => setG({ title:e.target.value }); V.onGenSub = (e) => setG({ sub:e.target.value });
+        V.genVariants = ['edcocoa','edcream','edphoto','edtype'].map((k) => ({ label:TBM.V[k].name.replace('Editorial · ', ''), onClick:() => setG({ variant:k }), style:this.seg(g.variant === k) }));
+        V.genChannels = ['xarticle','liarticle','lipost','medium','articlehero','blogpromo','nlpromo','pinterest'].map((f) => ({ label:TBM.FORMATS[f].label, onClick:() => setG({ ch:Object.assign({}, g.ch, { [f]:!g.ch[f] }) }), style:this.seg(!!g.ch[f]) }));
+        V.genOpen = () => { const ids = this.genDocs(); if (ids.length) { this.openTpl(ids[0]); this.toast(ids.length + ' banner(s) created — find the rest in this category marked “Edited”.', 'ok'); } };
+        V.genZip = () => { const ids = this.genDocs(); if (ids.length) this.bulk('png', ids); }; }
+      return V;
+    }
+
+    const d = s.doc; if (!d) return V; const z = this.zoom(), pg = d.pages[s.selPage] || d.pages[0], el = this.curEl();
+    V.wideHeader = s.vw >= 1150; V.docName = d.name; V.noUndo = !s.hist.length; V.noRedo = !s.fut.length; V.undo = () => this.undo(); V.redo = () => this.redo();
+    V.zoomVal = String(s.zoomMode); V.zoomOpts = [{ v:'fit', l:'Fit (' + Math.round(z * 100) + '%)' }].concat([0.25, 0.5, 0.75, 1, 1.5].map((x) => ({ v:String(x), l:x * 100 + '%' }))); V.onZoom = (e) => { this.setState({ zoomMode:e.target.value }); this.pendingCenter = true; };
+    V.togglePreview = () => this.setState({ preview:!s.preview, selEl:null }); V.previewBtn = Object.assign(this.seg(s.preview), { height:36 });
+    V.openExport = () => this.setState({ exportOpen:true }); V.closeExport = () => this.setState({ exportOpen:false }); V.exportOpen = s.exportOpen;
+    V.canvasDown = (e) => { if (e.target === e.currentTarget || e.target === e.currentTarget.firstChild) this.setState({ selEl:null }); };
+    V.columnStyle = { display:'flex', flexDirection:'column', alignItems:'center', gap:narrow ? 28 : 48, padding:narrow ? '16px 12px 96px' : '40px 32px', minWidth:'fit-content', boxSizing:'border-box', minHeight:'100%', justifyContent:d.pages.length === 1 ? 'center' : 'flex-start' };
+    V.canvasPages = d.pages.map((p, i) => ({ showLabel:!s.preview, label:(i + 1) + ' · ' + p.name, wrapId:'pw-' + p.id, dl:() => this.exportPage(i, 'png'),
+      wrapStyle:{ width:d.w * z, height:d.h * z, flex:'none', boxShadow:'0 16px 36px -12px rgba(30,13,6,.35)', outline:i === s.selPage && !s.preview ? '3px solid #C81F75' : 'none', outlineOffset:4 }, view:this.artView(d, p, i, z, true, 'ab-') }));
+    // panels
+    const showSide = !s.preview; V.showNav = showSide && (!narrow || s.panel === 'pages'); V.showInsp = showSide && (!narrow || s.panel === 'edit');
+    const sheet = { position:'absolute', left:0, right:0, bottom:56, height:'62%', zIndex:6, borderTop:'1px solid var(--a-border)', borderRadius:'20px 20px 0 0', boxShadow:'0 -16px 36px -12px rgba(30,13,6,.35)' };
+    V.navStyle = Object.assign({ width:narrow ? 'auto' : s.vw < 1200 ? 220 : 260, flex:'none', display:'flex', flexDirection:'column', background:'var(--a-surface)', borderRight:'1px solid var(--a-border)', minHeight:0, overflow:'hidden' }, narrow ? sheet : {});
+    V.inspStyle = Object.assign({ width:narrow ? 'auto' : s.vw < 1200 ? 280 : 320, flex:'none', display:'flex', flexDirection:'column', background:'var(--a-surface)', borderLeft:'1px solid var(--a-border)', minHeight:0, overflow:'hidden' }, narrow ? sheet : {});
+    V.closePanel = () => this.setState({ panel:'canvas' });
+    V.mobileTabs = [['pages', 'Pages', 'layers'], ['canvas', 'Canvas', 'square-pen'], ['edit', 'Edit', 'sliders-horizontal'], ['export', 'Export', 'download']].map(([id, label, icon]) => ({ label, icon, onClick:() => id === 'export' ? this.setState({ exportOpen:true }) : this.setState({ panel:id }), style:{ flex:1, minHeight:56, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2, border:0, background:'none', cursor:'pointer', font:'700 11px var(--font-body)', color:s.panel === id ? '#C81F75' : 'var(--a-fg)' } }));
+    // navigator
+    const kinds = TBM.pageKinds(d); V.hasKinds = kinds.length > 0; V.kindOpts = [{ v:'', l:'Duplicate of current page' }].concat(kinds.map(([v, l]) => ({ v, l }))); V.addKind = s.addKind; V.onAddKind = (e) => this.setState({ addKind:e.target.value });
+    V.addBefore = () => this.addPage(true); V.addAfter = () => this.addPage(false); V.pageCount = d.pages.length;
+    const kindLabel = (p) => d.mode === 'doc' && p.kind ? TBM.DOCS[d.docType].kinds[p.kind].label : (p.spec && TBM.V[p.spec] ? TBM.V[p.spec].name : 'Page');
+    V.navPages = d.pages.map((p, i) => { const on = i === s.selPage; const n = this.pageNum(d, i); return { num:i + 1, name:p.name, meta:kindLabel(p) + (n != null ? ' · p.' + n : '') + (p.toc ? ' · in contents' : ''), on, select:() => this.goPage(i), up:() => this.movePage(i, i - 1), down:() => this.movePage(i, i + 1), dup:() => this.dupPage(i), del:() => this.delPage(i),
+      dragStart:(e) => { this.dragFrom = i; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(i)); } catch (er) {} }, dragOver:(e) => { e.preventDefault(); if (s.dragOver !== i) this.setState({ dragOver:i }); }, drop:(e) => { e.preventDefault(); this.movePage(this.dragFrom, i); }, dragEnd:() => this.setState({ dragOver:null }),
+      style:{ display:'flex', alignItems:'center', borderRadius:12, background:on ? 'var(--a-sunken)' : 'transparent', boxShadow:on ? 'inset 3px 0 0 #C81F75' : s.dragOver === i ? 'inset 0 2px 0 #C81F75' : 'none', color:'var(--a-fg)', cursor:'grab' } }; });
+    V.layers = pg.elements.map((e, k) => ({ e, k })).reverse().map(({ e }) => ({ type:TBM.ELEMENT_KINDS[e.type], snip:e.type === 'text' ? '“' + String(e.text).slice(0, 28) + '”' : e.type === 'image' ? (e.src ? '' : '(empty)') : '', select:() => this.setState({ selEl:e.id }), up:() => this.zEl(e.id, 'up'), down:() => this.zEl(e.id, 'down'),
+      style:{ display:'flex', alignItems:'center', gap:2, borderRadius:8, background:s.selEl === e.id ? 'var(--a-sunken)' : 'transparent', color:'var(--a-fg)' } }));
+    // inspector
+    V.hasEl = !!el; V.noEl = !el; V.deselect = () => this.setState({ selEl:null }); V.inspTitle = el ? TBM.ELEMENT_KINDS[el.type] : 'Page & document';
+    if (el) { const t = el.type;
+      V.isTextEl = t === 'text' || t === 'pageno'; V.isImgEl = t === 'image'; V.isLogoEl = t === 'logo'; V.hasTextField = ['text', 'table', 'toc', 'chart', 'pageno'].includes(t);
+      V.textLabel = { text:'Text', table:'Table rows', toc:'Contents entries', chart:'Chart data', pageno:'Page number format' }[t] || 'Text'; V.elText = el.text; V.onText = (e) => this.updEl({ text:e.target.value }, 'coalesce'); V.textRows = t === 'text' && el.text.length > 120 ? 8 : 4;
+      V.textHint = { text:'Line breaks are kept. Blank lines separate paragraphs.', table:'One row per line · separate cells with |  · first row is the header.', toc:'One entry per line: Title | page. Use “Update contents page” to rebuild from pages.', chart:'One bar per line: Label: value. Illustrative until real data is supplied.', pageno:'{n} is replaced by the page number.' }[t];
+      V.overflow = s.overflow && t === 'text'; V.flow = () => this.flow();
+      V.dupEl = () => this.dupEl(); V.delEl = () => this.delEl(); V.toFront = () => this.zEl(el.id, 'top'); V.toBack = () => this.zEl(el.id, 'bottom');
+      V.fontVal = el.font; V.onFont = (e) => this.updEl({ font:e.target.value }); V.weightVal = String(el.weight); V.onWeight = (e) => this.updEl({ weight:+e.target.value });
+      const num = (label, k, step, mn) => ({ label, step:step || 1, val:el[k], on:(e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) this.updEl({ [k]:mn != null ? Math.max(mn, v) : v }, 'coalesce'); } });
+      V.typoFields = [num('Size', 'size', 1, 4), num('Line height', 'lh', 0.05, 0.6), num('Letter sp. (em)', 'ls', 0.01), num('Padding', 'pad', 1, 0), num('Radius', 'radius', 1, 0)];
+      V.alignSegs = [['left', 'Align left', 'align-left'], ['center', 'Align centre', 'align-center'], ['right', 'Align right', 'align-right'], ['justify', 'Justify', 'align-justify']].map(([v, title, icon]) => ({ title, icon, onClick:() => this.updEl({ align:v }), style:this.seg(el.align === v) }))
+        .concat([['top', 'Top', 'align-vertical-justify-start'], ['center', 'Middle', 'align-vertical-justify-center'], ['bottom', 'Bottom', 'align-vertical-justify-end']].map(([v, title, icon]) => ({ title:'Vertical ' + title, icon, onClick:() => this.updEl({ valign:v }), style:this.seg(el.valign === v) })));
+      V.textToggles = [['upper', 'UPPERCASE'], ['italic', 'Italic']].map(([k, label]) => ({ label, onClick:() => this.updEl({ [k]:!el[k] }), style:this.seg(!!el[k]) }));
+      V.photos = TBM.PHOTOS.map(([name, src]) => ({ name, src, pick:() => this.updEl({ src }), style:{ aspectRatio:'1', padding:0, borderRadius:10, overflow:'hidden', cursor:'pointer', border:'2px solid ' + (el.src === src ? '#C81F75' : 'transparent'), background:'var(--a-sunken)' } }));
+      V.uploadImg = () => document.getElementById('file-in').click(); V.clearImg = () => this.updEl({ src:'' });
+      V.frameSegs = [['none', 'Square'], ['round', 'Rounded'], ['arch', 'Arch'], ['circle', 'Circle']].map(([v, l]) => ({ label:l, onClick:() => this.updEl({ frame:v }), style:this.seg(el.frame === v) })).concat([['cover', 'Fill'], ['contain', 'Fit']].map(([v, l]) => ({ label:l, onClick:() => this.updEl({ fit:v }), style:this.seg(el.fit === v) })));
+      V.imgToggles = [{ label:'Photo scrim', onClick:() => this.updEl({ scrim:!el.scrim }), style:this.seg(!!el.scrim) }];
+      V.logoSegs = [['full', 'Full logo'], ['mark', 'Monogram (provisional)']].map(([v, l]) => ({ label:l, onClick:() => this.updEl({ variant:v }), style:this.seg(el.variant === v) }));
+      const up = (k) => (c) => this.updEl({ [k]:c });
+      V.swatchGroups = ({ text:[['Text colour', 'color'], ['Background', 'bg', 1]], pageno:[['Text colour', 'color']], image:[['Ring', 'ring', 1]], shape:[['Fill', 'fill'], ['Outline', 'stroke', 1]], logo:[['Tile', 'tile']], ribbon:[['Colour', 'color']], table:[['Text', 'color'], ['Header', 'head'], ['Rules', 'line']], toc:[['Text', 'color']], chart:[['Text', 'color'], ['Bar', 'bar'], ['Track', 'track']] }[t] || []).map(([l, k, none]) => this.swGroup(l, el[k], up(k), none));
+      const P = (k) => (e) => { const v = parseFloat(e.target.value); if (!isNaN(v)) this.updEl({ [k]:Math.round(v) }, 'coalesce'); };
+      V.posFields = [['X', 'x'], ['Y', 'y'], ['W', 'w'], ['H', 'h']].map(([label, k]) => ({ label, step:1, val:el[k], on:P(k) }));
+      V.alignPage = [['Centre horizontally', () => this.updEl({ x:Math.round((d.w - el.w) / 2) })], ['Centre vertically', () => this.updEl({ y:Math.round((d.h - el.h) / 2) })], ['Fill page', () => this.updEl({ x:0, y:0, w:d.w, h:d.h })]].map(([label, onClick]) => ({ label, onClick }));
+      V.opacity = el.opacity == null ? 1 : el.opacity; V.onOpacity = (e) => this.updEl({ opacity:+e.target.value }, 'coalesce');
+      V.pageSwatches = [];
+    } else {
+      const ic = { heading:'heading', text:'pilcrow', label:'tag', cta:'mouse-pointer-click', image:'image', shape:'square', logo:'cake', ribbon:'heart', table:'table', chart:'bar-chart-3', toc:'list-ordered', pageno:'hash' };
+      V.addEls = [['heading', 'Heading'], ['text', 'Paragraph'], ['label', 'Label'], ['cta', 'Button / CTA'], ['image', 'Image'], ['shape', 'Shape'], ['logo', 'Logo'], ['ribbon', 'Ribbon'], ['table', 'Table'], ['chart', 'Chart'], ['toc', 'Contents'], ['pageno', 'Page no.']].map(([k, label]) => ({ label, icon:ic[k], onClick:() => this.addEl(k) }));
+      V.isEditorial = d.cat === 'editorial'; const ft = d.pages[0].elements.find((e) => e.key === 'title'), fs = d.pages[0].elements.find((e) => e.key === 'sub');
+      V.artTitle = ft ? ft.text : ''; V.artSub = fs ? fs.text : ''; V.onArtTitle = (e) => this.setArticle('title', e.target.value); V.onArtSub = (e) => this.setArticle('sub', e.target.value);
+      V.pageName = pg.name; V.onPageName = (e) => this.updPage({ name:e.target.value }, 'coalesce');
+      V.pageToggles = (d.mode === 'doc' ? [{ label:'Numbered', onClick:() => this.updPage({ numbered:pg.numbered === false }), style:this.seg(pg.numbered !== false) }, { label:'In contents', onClick:() => this.updPage({ toc:!pg.toc }), style:this.seg(!!pg.toc) }] : [])
+        .concat((pg.kind || pg.spec) ? [{ label:'Re-apply page layout', onClick:() => { if (!confirm('Rebuild this page from its layout? Text and images are kept where possible.')) return; const tmp = JSON.parse(JSON.stringify(d)); tmp.pages = [pg]; const nd = TBM.relayout(tmp, d.formatId); this.mut((dd) => { dd.pages[s.selPage] = Object.assign(nd.pages[0], { id:pg.id }); }); }, style:this.seg(false) }] : []);
+      V.pageSwatches = [this.swGroup('Page background', pg.bg, (c) => this.updPage({ bg:c }))];
+      V.onDocName = (e) => this.mut((dd) => { dd.name = e.target.value; }, 'coalesce');
+      const tpl = TBM.TEMPLATES.find((t) => t.id === d.tpl) || {}; const sizes = tpl.sizes || [d.formatId];
+      V.sizeOpts = sizes.map((k) => { const f = TBM.FORMATS[k] || TBM.PAGE_SIZES[k]; return { v:k, l:f.label + ' · ' + f.w + '×' + f.h }; }); V.sizeVal = d.formatId; V.onSize = (e) => this.setSize(e.target.value);
+      const f = TBM.FORMATS[d.formatId]; V.exportDims = 'Canvas ' + d.w + ' × ' + d.h + ' px · exports at ' + Math.round(d.w * window.TBMX.scaleFor(d)) + ' × ' + Math.round(d.h * window.TBMX.scaleFor(d)) + ' px (1×)';
+      V.isDocMode = d.mode === 'doc'; V.togglePN = () => this.mut((dd) => { dd.pageNumbers.show = !dd.pageNumbers.show; }); V.pnStyle = this.seg(d.pageNumbers && d.pageNumbers.show); V.pnStart = d.pageNumbers ? d.pageNumbers.start : 1;
+      V.onPnStart = (e) => this.mut((dd) => { dd.pageNumbers.start = Math.max(0, parseInt(e.target.value) || 1); }); V.regenToc = () => this.regenToc(); V.resetTpl = () => this.resetTpl();
+      V.swatchGroups = [];
+    }
+    // export dialog
+    const X = window.TBMX, multi = d.pages.length > 1, P1 = s.selPage;
+    V.scaleSegs = [1, 2, 3].map((x) => ({ label:x + '×', onClick:() => this.setState({ scale:x }), style:this.seg(s.scale === x) })); V.jpgQ = s.jpgQ; V.onJpgQ = (e) => this.setState({ jpgQ:+e.target.value });
+    V.exportNote = 'Exports use your current edits. Page ' + (P1 + 1) + ' of ' + d.pages.length + ' is selected. Fonts are embedded from Google Fonts; an internet connection is needed for export libraries.';
+    const g1 = { title:'Current page', items:[{ label:'PNG', sub:'Page ' + (P1 + 1) + ' · lossless', onClick:() => this.exportPage(P1, 'png') }, { label:'JPG', sub:'Page ' + (P1 + 1) + ' · smaller file', onClick:() => this.exportPage(P1, 'jpeg') }, { label:'SVG', sub:'Page ' + (P1 + 1) + ' · vector wrapper*', onClick:() => this.exportPage(P1, 'svg') }, { label:'PDF', sub:'Page ' + (P1 + 1) + ' only', onClick:() => this.run('PDF page', () => X.pdf(Object.assign({}, d, { name:d.name + ' p' + (P1 + 1) }), [this.nodes()[P1]])) }] };
+    const g2 = { title:multi ? 'All ' + d.pages.length + ' pages' : 'Whole design', items:[{ label:'PDF', sub:'Multi-page, in order', onClick:() => this.run('PDF', () => X.pdf(d, this.nodes())) }, { label:'PNG (ZIP)', sub:'One file per page', onClick:() => this.exportZip('png') }, { label:'JPG (ZIP)', sub:'One file per page', onClick:() => this.exportZip('jpeg') }, { label:'PPTX', sub:'Editable slides, native text', onClick:() => this.run('PowerPoint', () => X.pptx(d)) }] };
+    const g3 = { title:'Editable & text formats', items:[] };
+    if (d.mode === 'doc') g3.items.push({ label:'DOCX', sub:'Word, styles + images', onClick:() => this.run('Word document', () => X.docx(d)) });
+    if (d.mode === 'doc' && (d.docType === 'ebook' || d.docType === 'article' || d.docType === 'newsletter' || d.docType === 'report' || d.docType === 'whitepaper')) g3.items.push({ label:'EPUB', sub:'Reflowable ebook + nav', onClick:() => this.run('EPUB', () => X.epub(d)) });
+    g3.items.push({ label:'HTML', sub:d.cat === 'email' ? 'Email layout, images embedded' : 'Layout-exact, self-contained', onClick:() => this.run('HTML', () => X.html(d, this.nodes())) });
+    if (d.mode === 'doc' || d.cat === 'email' || d.cat === 'web' || multi) { g3.items.push({ label:'Markdown', sub:'Headings, lists, tables', onClick:() => this.run('Markdown', async () => X.md(d)) }); g3.items.push({ label:'Plain text', sub:'Copy-ready', onClick:() => this.run('Text', async () => X.txt(d)) }); }
+    g3.items.push({ label:'Project file', sub:'JSON — reopen & keep editing', onClick:() => this.run('Project file', async () => X.json(d)) });
+    V.exportGroups = [g1, g2, g3];
+    return V;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,42 +1,27 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Design-system tokens (verbatim from _ds/.../tokens). Webfonts are self-hosted: see lib/fonts.ts. */
+@import '../ds/tokens/colors.css';
+@import '../ds/tokens/typography.css';
+@import '../ds/tokens/spacing.css';
+@import '../ds/tokens/base.css';
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* App chrome theme (from Treats Studio.dc.html). Artboards and brand specimens keep brand colours. */
+:root{--a-bg:#FFF4DC;--a-surface:#FFFDF6;--a-sunken:#FDE3F0;--a-fg:#3D1D10;--a-fg2:#5A2F1C;--a-border:#F7DC85;--a-canvas:#FFF2F8;--a-accent:#C81F75;--a-link:#AD1660;--a-on:#3D1D10;--a-on-fg:#FFF9EA;--a-scrim:rgba(43,20,10,.4);color-scheme:light}
+[data-theme="dark"]{--a-bg:#1E0D06;--a-surface:#2B140A;--a-sunken:#3D1D10;--a-fg:#FFF4DC;--a-fg2:#EEDFD3;--a-border:#5A2F1C;--a-canvas:#140803;--a-accent:#C81F75;--a-link:#F59AC6;--a-on:#F2C94C;--a-on-fg:#2B140A;--a-scrim:rgba(0,0,0,.6);color-scheme:dark}
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+/* Mobile spacing from the design system readme: sections 96px (64 mobile), page margin 32 / 20. */
+@media (max-width:640px){:root{--section-y:var(--section-y-mobile);--page-margin:var(--page-margin-mobile)}}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+html,body{margin:0;background:var(--a-bg);color:var(--a-fg);font-family:var(--font-body)}
+html{-webkit-tap-highlight-color:transparent}
+body{min-height:100dvh;overflow-x:clip}
+a{color:var(--a-link)}a:hover{color:var(--a-accent)}
+*:focus-visible{outline:2px solid #C81F75;outline-offset:2px;box-shadow:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button:disabled{opacity:.5;cursor:not-allowed!important}
+img{max-width:100%}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important;animation:none!important}}
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+/* Brand specimen surface: DS components are designed for cream grounds, so they always sit on one. */
+.ds-stage{background:var(--bg-page);color:var(--text-primary);border-radius:var(--radius-lg);border:1px solid var(--border-subtle)}
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}

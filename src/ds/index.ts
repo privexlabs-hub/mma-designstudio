@@ -1,0 +1,23 @@
+/* Treats by MMA design system — public entry. Import components from here, not from their files. */
+export { IcingEdge } from './components/brand/IcingEdge';
+export { PhotoFrame } from './components/brand/PhotoFrame';
+export { RibbonRule } from './components/brand/RibbonRule';
+export { SectionHeading } from './components/brand/SectionHeading';
+export { CategoryCard } from './components/commerce/CategoryCard';
+export { Price } from './components/commerce/Price';
+export { ProductCard } from './components/commerce/ProductCard';
+export { QuantityStepper } from './components/commerce/QuantityStepper';
+export { CAT, type CategoryId } from './components/commerce/categories';
+export { Badge, type BadgeTone } from './components/core/Badge';
+export { Button, type ButtonVariant } from './components/core/Button';
+export { Icon } from './components/core/Icon';
+export { IconButton } from './components/core/IconButton';
+export { Alert } from './components/feedback/Alert';
+export { AnnouncementBanner } from './components/feedback/AnnouncementBanner';
+export { EmptyState } from './components/feedback/EmptyState';
+export { Checkbox } from './components/forms/Checkbox';
+export { OptionCard } from './components/forms/OptionCard';
+export { SelectField } from './components/forms/SelectField';
+export { TextField } from './components/forms/TextField';
+export { CategoryTabs } from './components/navigation/CategoryTabs';
+export { NavBar } from './components/navigation/NavBar';

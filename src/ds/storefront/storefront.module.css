@@ -1,0 +1,34 @@
+/* Responsive layout for the storefront UI kit. The kit's original grids were desktop-only;
+   these container queries collapse them on narrow screens (the kit sits in a size container). */
+.root { container-type: inline-size; background: var(--bg-page); color: var(--text-primary); font-family: var(--font-body); min-height: 100%; }
+.wrap { max-width: var(--container-lg); margin: 0 auto; padding: 0 var(--page-margin); }
+
+.hero, .celebration, .contact, .product { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.celebration, .product { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.contact { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 40px; }
+.product { align-items: start; }
+.cats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px; margin-top: 48px; }
+.four { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.footer { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+.order { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 56px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.sizes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.sticky { position: sticky; top: 24px; align-self: start; display: flex; flex-direction: column; gap: 16px; }
+.headRow { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 36px; flex-wrap: wrap; }
+
+@container (max-width: 900px) {
+  .cats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .four, .three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .order { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .sticky { position: static; }
+}
+@container (max-width: 760px) {
+  .hero, .celebration, .contact, .product { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .footer { grid-template-columns: 1fr 1fr; }
+}
+@container (max-width: 560px) {
+  .cats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .four, .three, .pair, .sizes { grid-template-columns: minmax(0, 1fr); }
+  .footer { grid-template-columns: minmax(0, 1fr); }
+}

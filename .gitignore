@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/public/icons
+/public/fonts
+/test-results
+/e2e/out

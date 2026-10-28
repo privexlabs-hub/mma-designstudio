@@ -1,0 +1,63 @@
+/* Treats by MMA — color tokens. Base palette extracted from the official logo (cocoa, gold, icing pink, cream). */
+:root{
+/* Cocoa — the cake body. Primary brand neutral, text, dark grounds */
+--cocoa-950:#1E0D06;--cocoa-900:#2B140A;--cocoa-800:#3D1D10;--cocoa-700:#5A2F1C;--cocoa-600:#7A4A33;--cocoa-500:#9C6D55;--cocoa-300:#C9A893;--cocoa-100:#EEDFD3;
+/* Gold — the lettering + cake stand. Signature highlight; text only on cocoa */
+--gold-700:#8F6410;--gold-600:#B98A14;--gold-500:#E8B323;--gold-400:#F2C94C;--gold-300:#F7DC85;--gold-100:#FCF1CC;
+/* Icing pink — the drip. Action + celebration accent */
+--icing-800:#8E0F4F;--icing-700:#AD1660;--icing-600:#C81F75;--icing-500:#E8358F;--icing-300:#F59AC6;--icing-100:#FDE3F0;--icing-50:#FFF2F8;
+/* Butter vanilla — custard-yellow neutral (deliberately not beige/ivory). Default page ground */
+--cream-0:#FFFDF6;--cream-50:#FFF9EA;--cream-100:#FFF4DC;--cream-200:#F8E8C4;--cream-300:#EED7A8;
+/* Fresh accents (proposed) — milk blue for yogurt/fura, leaf green for small chops. No orange/terracotta anywhere in the system. */
+--milk-700:#1E5C91;--milk-600:#2A6FAD;--milk-500:#4A8FD0;--milk-100:#E1EEFA;
+--leaf-700:#1E6B3A;--leaf-600:#23803F;--leaf-500:#2E9A4E;--leaf-100:#DDF3E2;
+--sky-700:#1F5A8A;--sky-100:#DDEBF7;
+
+/* Semantic roles */
+--brand-primary:var(--cocoa-800);
+--brand-secondary:var(--gold-500);
+--brand-accent:var(--icing-500);
+--action-primary:var(--icing-600);
+--action-primary-hover:var(--icing-700);
+--action-primary-active:var(--icing-800);
+--action-on-primary:#FFFFFF;
+--action-secondary:var(--cocoa-800);
+--action-secondary-hover:var(--cocoa-900);
+
+--bg-page:var(--cream-100);
+--bg-page-alt:var(--cream-50);
+--surface:var(--cream-0);
+--surface-sunken:var(--cream-200);
+--surface-elevated:#FFFFFF;
+--surface-inverse:var(--cocoa-800);
+--surface-inverse-deep:var(--cocoa-900);
+
+--text-primary:var(--cocoa-800);
+--text-secondary:var(--cocoa-600);
+--text-muted:#8A6452;
+--text-on-inverse:var(--cream-50);
+--text-on-inverse-muted:var(--cocoa-300);
+--text-gold-on-inverse:var(--gold-400);
+--text-link:var(--icing-700);
+
+--border-subtle:var(--cream-200);
+--border-default:var(--cream-300);
+--border-strong:var(--cocoa-300);
+--border-focus:var(--icing-600);
+--divider:var(--cream-200);
+
+--success:var(--leaf-600);--success-bg:var(--leaf-100);--success-fg:var(--leaf-700);
+--warning:var(--gold-500);--warning-bg:var(--gold-100);--warning-fg:var(--gold-700);
+--error:#C0392B;--error-bg:#FADBD6;--error-fg:#9B2618;
+--info:var(--sky-700);--info-bg:var(--sky-100);--info-fg:var(--sky-700);
+
+/* Product category accents */
+--cat-cakes:var(--icing-500);--cat-cakes-bg:var(--icing-100);--cat-cakes-fg:var(--icing-700);
+--cat-bakes:var(--gold-500);--cat-bakes-bg:var(--gold-100);--cat-bakes-fg:var(--gold-700);
+--cat-chops:var(--leaf-500);--cat-chops-bg:var(--leaf-100);--cat-chops-fg:var(--leaf-700);
+--cat-yogurt:var(--milk-500);--cat-yogurt-bg:var(--milk-100);--cat-yogurt-fg:var(--milk-700);
+--cat-celebration:var(--cocoa-800);--cat-celebration-bg:var(--cocoa-100);--cat-celebration-fg:var(--cocoa-800);
+
+/* Signature gradient: gold foil (use on cocoa only, never as page bg) */
+--gold-foil:linear-gradient(160deg,#F7DC85 0%,#E8B323 45%,#B98A14 100%); /* @kind other */
+}

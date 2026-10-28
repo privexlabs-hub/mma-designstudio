@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div id="{{ view.domId }}" style="{{ view.style }}" onPointerDown="{{ view.onDown }}">
+<sc-for list="{{ view.els }}" as="el" hint-placeholder-count="0">
+<div id="{{ el.domId }}" style="{{ el.box }}" onPointerDown="{{ el.onDown }}" onDoubleClick="{{ el.onDbl }}">
+<sc-if value="{{ el.isText }}"><div id="{{ el.txId }}" style="{{ el.inner }}">{{ el.text }}</div></sc-if>
+<sc-if value="{{ el.isImg }}"><img src="{{ el.src }}" alt="" draggable="false" style="{{ el.imgStyle }}"></sc-if>
+<sc-if value="{{ el.isPh }}"><div style="{{ el.ph }}">Add image</div></sc-if>
+<sc-if value="{{ el.scrim }}"><div style="{{ el.scrimStyle }}"></div></sc-if>
+<sc-if value="{{ el.isRibbon }}"><div style="{{ el.rib.line }}"></div><div style="{{ el.rib.heart }}">♥</div><div style="{{ el.rib.line }}"></div></sc-if>
+<sc-if value="{{ el.isRows }}"><sc-for list="{{ el.rows }}" as="row" hint-placeholder-count="0"><div style="{{ row.style }}"><sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="0"><div style="{{ cell.style }}">{{ cell.text }}<sc-if value="{{ cell.fill }}"><div style="{{ cell.fill }}"></div></sc-if></div></sc-for></div></sc-for></sc-if>
+<sc-if value="{{ el.sel }}"><div data-sel="1" style="{{ el.selStyle }}"></div><div data-sel="1" style="{{ el.handle }}" onPointerDown="{{ el.onResize }}"></div></sc-if>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;view&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}"></script>
+</body>
+</html>

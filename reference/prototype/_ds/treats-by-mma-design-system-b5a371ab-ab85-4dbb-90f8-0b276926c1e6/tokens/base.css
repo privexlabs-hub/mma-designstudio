@@ -1,0 +1,16 @@
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg-page);color:var(--text-primary);font-family:var(--font-body);font-size:var(--text-body);line-height:var(--leading-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:400;line-height:var(--leading-heading);margin:0;text-wrap:balance}
+p{margin:0;text-wrap:pretty}
+a{color:var(--text-link);text-decoration-thickness:1.5px;text-underline-offset:3px}
+a:hover{color:var(--icing-800)}
+:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+.tbm-display{font-family:var(--font-display);font-size:var(--text-display);line-height:var(--leading-display);letter-spacing:var(--tracking-display)}
+.tbm-h1{font-family:var(--font-display);font-size:var(--text-h1);line-height:var(--leading-heading)}
+.tbm-h2{font-family:var(--font-display);font-size:var(--text-h2);line-height:var(--leading-heading)}
+.tbm-h3{font-family:var(--font-display);font-size:var(--text-h3);line-height:var(--leading-snug)}
+.tbm-h4{font-family:var(--font-body);font-weight:700;font-size:var(--text-h4);line-height:var(--leading-snug)}
+.tbm-label{font-family:var(--font-body);font-weight:700;font-size:var(--text-label);letter-spacing:var(--tracking-label);text-transform:uppercase}
+.tbm-ribbon-rule{display:flex;align-items:center;gap:10px;color:var(--icing-500)}
+.tbm-ribbon-rule::before,.tbm-ribbon-rule::after{content:"";flex:1;height:3px;border-radius:3px;background:currentColor}

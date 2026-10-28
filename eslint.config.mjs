@@ -18,7 +18,18 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "reference/**",
+      "public/**",
     ],
+  },
+  {
+    // Design-system adherence (from _ds/.../_adherence.oxlintrc.json): outside the design system,
+    // import components from '@/ds', not from their internal files.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/ds/**"],
+    rules: {
+      "no-restricted-imports": ["error", { patterns: [{ group: ["@/ds/components/**", "**/ds/components/**"], message: "Import design-system components from '@/ds', not component internals." }] }],
+    },
   },
 ];
 

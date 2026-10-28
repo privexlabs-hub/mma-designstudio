@@ -1,94 +1,60 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import { Icon } from '@/ds';
+import { AppHeader } from '@/components/AppHeader';
+import { SECTIONS } from '@/components/sections';
+import p from '@/components/page.module.css';
+import { BRAND } from '@/content/brand';
+import { TEMPLATES } from '@/lib/studio';
+import h from './home.module.css';
+
+const COUNTS: Record<string, string> = {
+  '/studio': TEMPLATES.length + ' templates · 8 categories · 12 export formats',
+  '/design-system': '12 sections · 21 components · storefront kit',
+  '/playbook': 'Essence, story, audit, packaging, social, checklist',
+  '/voice': 'Voice, rules, sample copy, brand facts',
+  '/assets': 'Logo, monogram, 6 photos, flyer, tokens',
+};
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
+    <div className={p.page}>
+      <AppHeader />
+      <main>
+        <section className={h.hero}>
+          <div className={`${p.wrap} ${h.heroInner}`}>
+            <div className={h.copy}>
+              <span className={p.eyebrow}>Treats by MMA · brand studio</span>
+              <h1 className={h.title}>{BRAND.essence}</h1>
+              <p className={p.lead} style={{ marginTop: 0 }}>{BRAND.positioning}</p>
+              <div className={h.ctas}>
+                <Link href="/studio" className={`${p.btn} ${p.btnPink}`} style={{ minHeight: 48, padding: '0 22px', fontSize: 16 }}><Icon name="pen-line" size={18} />Open the Studio</Link>
+                <Link href="/design-system" className={p.btn} style={{ minHeight: 48, padding: '0 22px', fontSize: 16 }}><Icon name="swatch-book" size={18} />Design system</Link>
+              </div>
+            </div>
+            <div className={h.logo}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- supplied raster logo, shown unaltered */}
+              <img src="/assets/ui/logo-768.webp" alt="Treats by MMA — Cakes and Pastries" />
+            </div>
+          </div>
+        </section>
+        <section className={p.wrap} style={{ paddingTop: 40, paddingBottom: 80 }}>
+          <div className={h.cards}>
+            {SECTIONS.map((x) => (
+              <Link key={x.href} href={x.href} className={h.card}>
+                <span className={h.icon}><Icon name={x.icon} size={22} /></span>
+                <b>{x.label}</b>
+                <span>{x.sub}</span>
+                <small>{COUNTS[x.href]}</small>
+              </Link>
+            ))}
+          </div>
+        </section>
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      <footer className={p.footer}>
+        <div className={p.wrap}>
+          <span>Treats by MMA · Suleja, Abuja</span>
+          <span>Imagery is conceptual · details marked [to confirm] need the owner’s confirmation before publishing.</span>
+        </div>
       </footer>
     </div>
   );
