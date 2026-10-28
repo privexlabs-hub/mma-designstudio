@@ -4,11 +4,11 @@ import { AppHeader } from '@/components/AppHeader';
 import { SECTIONS } from '@/components/sections';
 import p from '@/components/page.module.css';
 import { BRAND } from '@/content/brand';
-import { TEMPLATES } from '@/lib/studio';
+import { CATS, TEMPLATES } from '@/lib/studio';
 import h from './home.module.css';
 
 const COUNTS: Record<string, string> = {
-  '/studio': TEMPLATES.length + ' templates · 8 categories · 12 export formats',
+  '/studio': TEMPLATES.length + ' templates · ' + CATS.length + ' categories · 12 export formats',
   '/design-system': '12 sections · 21 components · storefront kit',
   '/playbook': 'Essence, story, audit, packaging, social, checklist',
   '/voice': 'Voice, rules, sample copy, brand facts',

@@ -83,7 +83,7 @@ export interface Doc {
   edition?: Edition;
 }
 
-export type CatId = 'social' | 'banners' | 'avatars' | 'ads' | 'email' | 'web' | 'editorial' | 'documents';
+export type CatId = 'social' | 'platform' | 'banners' | 'avatars' | 'ads' | 'email' | 'web' | 'editorial' | 'documents';
 export type Edition = 'cream' | 'cocoa';
 export type DocTypeId = 'ebook' | 'report' | 'whitepaper' | 'proposal' | 'casestudy' | 'presentation' | 'article' | 'newsletter' | 'resume';
 

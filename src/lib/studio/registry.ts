@@ -1,9 +1,9 @@
 /* Template registry and document operations (relayout, new page, new element).
    Ported from studio-lib.js. Template definitions live here, separate from user edits. */
-import { C, PH } from './brand';
+import { C, HANDLE, PH } from './brand';
 import { AVATARS, CAROUSELS, DOCS, EMAILS, FORMATS, PAGE_SIZES, V, WEBS } from './data';
 import { CH, I, L, PN, RB, S, T, TB, TH, TOC, avatar, compose, docPage, isDark, nid, stack } from './engine';
-import type { CatId, Composed, Doc, DocTypeId, El, ElType, Page, Template, Variant } from './types';
+import type { CatId, Composed, Doc, DocTypeId, El, ElType, Item, Page, Template, Variant } from './types';
 
 export const TEMPLATES: Template[] = [];
 export const BUILD: Record<string, (sizeId?: string) => Doc> = {};
@@ -19,6 +19,17 @@ addSet('social', 'engage', ['poll', 'thisorthat', 'question', 'fillblank', 'capt
 addSet('social', 'portrait', ['product', 'promo', 'educational', 'celebration', 'testimonial', 'statistic', 'launch', 'founder', 'comparison', 'announce', 'update', 'spotlight']);
 addSet('social', 'story', ['announce', 'product', 'countdown', 'poll', 'question', 'testimonial', 'bts', 'steps', 'launch', 'cta', 'update', 'celebration']);
 addSet('social', 'ytthumb', ['process', 'reveal', 'comparison', 'tutorial', 'vlog', 'bts']);
+
+/* Platform posts — the Square post design set on each platform's feed formats. The handle line uses
+   that platform's account from the supplied flyer; X has no known account, so it stays [to confirm]. */
+const POST_SET = ['announce', 'product', 'update', 'launch', 'testimonial', 'educational', 'statistic', 'promo', 'cta', 'menu', 'founder', 'celebration', 'comparison', 'bts', 'seasonal', 'notice'];
+const withHandle = (v: Variant, handle: string): Variant => ({ ...v, items: v.items.map((i) => i[0] === 'handle' && i[1] === HANDLE ? (['handle', handle] as Item) : i) });
+const PLATFORM_FORMATS: [string, string | null][] = [['igpost', null], ['igsquare', null], ['xpost', '[X handle to confirm]'], ['xsquare', '[X handle to confirm]'], ['fbpost', 'Facebook · Eze Chinwendu'], ['fblandscape', 'Facebook · Eze Chinwendu'], ['tiktok', 'TikTok @.mmacakeandpastry']];
+PLATFORM_FORMATS.forEach(([fmt, handle]) => POST_SET.forEach((vk) => {
+  const F0 = FORMATS[fmt]; const t: Template = { id: fmt + ':' + vk, name: V[vk].name, cat: 'platform', sub: F0.label + ' · ' + F0.w + ' × ' + F0.h, formatId: fmt, sizes: COMPOSE_FORMATS };
+  const spec: string | Variant = handle ? withHandle(V[vk], handle) : vk;
+  reg(t, (f) => { f = f || fmt; return graphicDoc(t, f, [vpage(spec, FORMATS[f].w, FORMATS[f].h)]); });
+}));
 Object.keys(CAROUSELS).forEach((ck) => {
   const cs = CAROUSELS[ck]; const t: Template = { id: 'carousel:' + ck, name: cs.name, cat: 'social', sub: 'Carousel · ' + cs.pages.length + ' slides · 1080 × 1080', formatId: 'carousel', sizes: ['carousel', 'portrait', 'square'], multi: 1 };
   reg(t, (f) => { f = f || 'carousel'; const { w, h } = FORMATS[f]; return graphicDoc(t, f, cs.pages.map(([nm, v]) => vpage(v, w, h, nm))); });
@@ -55,7 +66,7 @@ Object.keys(WEBS).forEach((wk) => {
   });
 });
 
-export const CATS: [CatId, string][] = [['social', 'Social posts'], ['banners', 'Banners & covers'], ['avatars', 'Avatars'], ['ads', 'Advertising'], ['email', 'Email'], ['web', 'Web'], ['editorial', 'Article & editorial'], ['documents', 'Documents']];
+export const CATS: [CatId, string][] = [['social', 'Social posts'], ['platform', 'Platform posts'], ['banners', 'Banners & covers'], ['avatars', 'Avatars'], ['ads', 'Advertising'], ['email', 'Email'], ['web', 'Web'], ['editorial', 'Article & editorial'], ['documents', 'Documents']];
 export const ELEMENT_KINDS: Record<ElType, string> = { text: 'Text', image: 'Image', shape: 'Shape', logo: 'Logo / mark', ribbon: 'Ribbon rule', table: 'Table', toc: 'Contents list', chart: 'Bar chart', pageno: 'Page number' };
 
 /* rebuild a single page from its kind/spec at new size, preserving content by key */

@@ -5,7 +5,7 @@ Next.js 15 + TypeScript build of the Claude Design project “Treats Studio” (
 | Route | What it is |
 |---|---|
 | `/` | Hub |
-| `/studio` (`?cat=…`) | Template library: 202 templates in 8 categories, search, bulk ZIP export, article banner generator |
+| `/studio` (`?cat=…`) | Template library: 314 templates in 9 categories, search, bulk ZIP export, article banner generator |
 | `/studio/edit/<template id>` | Editor: pages, layers, canvas, inspector, undo/redo, all exports |
 | `/design-system` | Design system in 12 sections, with all 21 components live |
 | `/design-system/storefront` | Storefront UI kit (home → menu → product → cake request → order bag) |
@@ -28,7 +28,7 @@ Node 20+. Everything runs in the browser and no backend is needed. Edits save to
 ```bash
 npm run typecheck    # tsc --noEmit
 npm run lint         # includes the design-system import rule from _adherence.oxlintrc.json
-npm test             # Vitest: 202 templates + every relayout compared with the original studio-lib.js
+npm test             # Vitest: the prototype's 202 templates + every relayout compared with the original studio-lib.js; platform posts checked
 BASE=http://localhost:3000 npm run e2e   # Playwright: responsive sweep, desktop studio + all exports, mobile touch
 ```
 
@@ -46,6 +46,21 @@ src/features/design-system/, src/features/brand/   page sections
 src/content/brand.ts brand copy, taken from the design-system readme
 reference/prototype/ the original Claude Design files, kept for parity tests
 ```
+
+## Added after the prototype: platform posts
+
+A **Platform posts** library tab holds the 16-design post set (the same designs as Square post) on each platform's feed formats. That is 112 templates:
+
+| Platform | Formats |
+|---|---|
+| Instagram | 1080×1440 (3:4) and 1080×1080 (1:1) |
+| X / Twitter | 1600×900 (16:9) and 1080×1080 (1:1) |
+| Facebook | 1080×1350 (4:5) and 1200×630 (landscape) |
+| TikTok | 1080×1920 (9:16) photo post |
+
+- **Handle lines** use each platform's account from the flyer: Instagram @treats_by_mma, TikTok @.mmacakeandpastry, Facebook "Eze Chinwendu". No X account was supplied, so X posts show `[X handle to confirm]`.
+- **Sizes everywhere.** The new sizes are also offered in every social, banner, ad, web and editorial template's Size menu, after the prototype's own sizes.
+- **TikTok overlays.** The app's buttons and caption cover the right and bottom edges, so check those areas before posting.
 
 ## Differences from the prototype (deliberate)
 

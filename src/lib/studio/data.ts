@@ -22,6 +22,11 @@ export const FORMATS: Record<string, Format> = {
   xarticle:F('X article image (5:2)',1500,600,'editorial',{ ex:2000 }), liarticle:F('LinkedIn article cover',1920,1080,'editorial'), lipost:F('LinkedIn post image',1200,627,'editorial'),
   medium:F('Medium article header',1400,788,'editorial'), articlehero:F('Website article hero',1600,900,'editorial'), blogpromo:F('Blog promotion (OG)',1200,630,'editorial'),
   nlpromo:F('Newsletter promotion',1200,600,'editorial'), pinterest:F('Pinterest pin',1000,1500,'editorial'),
+  /* Platform feed posts (added after the prototype; appended so existing size lists keep their order). */
+  igpost:F('Instagram post (3:4)',1080,1440,'platform'), igsquare:F('Instagram post (1:1)',1080,1080,'platform'),
+  xpost:F('X post (16:9)',1600,900,'platform'), xsquare:F('X post (1:1)',1080,1080,'platform'),
+  fbpost:F('Facebook post (4:5)',1080,1350,'platform'), fblandscape:F('Facebook post (landscape)',1200,630,'platform'),
+  tiktok:F('TikTok photo post (9:16)',1080,1920,'platform'),
 };
 export const PAGE_SIZES: Record<string, PageSize> = { a4:{ label:'A4 portrait', w:794, h:1123 }, letter:{ label:'US Letter', w:816, h:1056 }, a5:{ label:'A5', w:559, h:794 }, ebook:{ label:'Ebook 6×9 in', w:576, h:864 }, slide169:{ label:'Slide 16:9', w:1920, h:1080 }, slide43:{ label:'Slide 4:3', w:1440, h:1080 } };
 export const V: Record<string, Variant & { name: string }> = {

@@ -15,27 +15,65 @@ const TBM = sandbox.window.TBM as any;
 const strip = (d: Doc) => JSON.parse(JSON.stringify(d, (k, v) => (k === 'id' ? undefined : typeof v === 'string' && v.startsWith('/assets/') ? v.slice(1) : v)));
 
 describe('template registry', () => {
-  it('has 202 templates in the INVENTORY.md category counts', () => {
-    expect(TEMPLATES).toHaveLength(202);
-    const count = (c: string) => TEMPLATES.filter((t) => t.cat === c).length;
-    expect(CATS.map(([c]) => count(c))).toEqual([59, 36, 6, 36, 8, 7, 32, 18]);
+  const ORIGINAL = TEMPLATES.filter((t) => t.cat !== 'platform');
+  const PLATFORM = TEMPLATES.filter((t) => t.cat === 'platform');
+
+  it('keeps the prototype’s 202 templates in the INVENTORY.md category counts', () => {
+    expect(ORIGINAL).toHaveLength(202);
+    const count = (c: string) => ORIGINAL.filter((t) => t.cat === c).length;
+    expect(CATS.filter(([c]) => c !== 'platform').map(([c]) => count(c))).toEqual([59, 36, 6, 36, 8, 7, 32, 18]);
   });
 
-  it('lists the same template ids, names and sizes as the prototype', () => {
-    expect(TEMPLATES.map((t) => [t.id, t.name, t.cat, t.sub, t.sizes])).toEqual(TBM.TEMPLATES.map((t: Record<string, unknown>) => [t.id, t.name, t.cat, t.sub, t.sizes]));
+  it('lists the same template ids, names and subtitles as the prototype; sizes extend the prototype’s list', () => {
+    expect(ORIGINAL.map((t) => [t.id, t.name, t.cat, t.sub])).toEqual(TBM.TEMPLATES.map((t: Record<string, unknown>) => [t.id, t.name, t.cat, t.sub]));
+    ORIGINAL.forEach((t, i) => { const theirs = TBM.TEMPLATES[i].sizes as string[]; expect(t.sizes.slice(0, theirs.length), t.id).toEqual(theirs); });
   });
 
-  it.each(TEMPLATES.map((t) => t.id))('builds %s identically to the prototype', (id) => {
+  it.each(ORIGINAL.map((t) => t.id))('builds %s identically to the prototype', (id) => {
     expect(strip(BUILD[id]())).toEqual(strip(TBM.BUILD[id]()));
   });
 
   it('relayouts every template to each allowed size identically to the prototype', () => {
-    for (const t of TEMPLATES) {
+    for (const t of ORIGINAL) {
       for (const sz of t.sizes.slice(0, 3)) {
         const ours = relayout(BUILD[t.id](), sz), theirs = TBM.relayout(TBM.BUILD[t.id](), sz);
         expect(strip(ours), t.id + ' @ ' + sz).toEqual(strip(theirs));
       }
     }
+  });
+
+  it('adds the 16-design post set on 7 platform formats', () => {
+    expect(PLATFORM).toHaveLength(112);
+    const dims: Record<string, [number, number]> = { igpost: [1080, 1440], igsquare: [1080, 1080], xpost: [1600, 900], xsquare: [1080, 1080], fbpost: [1080, 1350], fblandscape: [1200, 630], tiktok: [1080, 1920] };
+    for (const [fmt, [w, h]] of Object.entries(dims)) {
+      const set = PLATFORM.filter((t) => t.formatId === fmt);
+      expect(set.map((t) => t.name), fmt).toEqual(TEMPLATES.filter((t) => t.formatId === 'square').map((t) => t.name));
+      for (const t of set) {
+        const d = BUILD[t.id]();
+        expect([d.w, d.h], t.id).toEqual([w, h]);
+        expect(d.cat).toBe('platform');
+        for (const e of d.pages[0].elements) {
+          expect(e.x >= 0 && e.y >= 0 && e.x + e.w <= w + 1 && e.y + e.h <= h + 1, t.id + ' ' + e.key + ' inside the page').toBe(true);
+          expect(e.w > 0 && e.h > 0, t.id + ' ' + e.key + ' has size').toBe(true);
+        }
+      }
+    }
+  });
+
+  it('uses each platform’s handle from the flyer (X stays [to confirm])', () => {
+    const handle = (id: string) => BUILD[id]().pages[0].elements.find((e) => e.key === 'handle')?.text;
+    expect(handle('igpost:educational')).toBe('@treats_by_mma');
+    expect(handle('tiktok:educational')).toBe('TikTok @.mmacakeandpastry');
+    expect(handle('fbpost:educational')).toBe('Facebook · Eze Chinwendu');
+    expect(handle('xpost:educational')).toBe('[X handle to confirm]');
+    expect(handle('xpost:cta')).toBe('0813 107 7321'); // non-handle lines are untouched
+  });
+
+  it('resizes platform posts between formats, keeping edits', () => {
+    const d = BUILD['tiktok:announce'](); d.pages[0].elements.find((e) => e.key === 'title')!.text = 'Edited title';
+    const r = relayout(d, 'xpost');
+    expect([r.w, r.h]).toEqual([1600, 900]);
+    expect(r.pages[0].elements.find((e) => e.key === 'title')?.text).toBe('Edited title');
   });
 
   it('keeps document page kinds from INVENTORY.md', () => {
