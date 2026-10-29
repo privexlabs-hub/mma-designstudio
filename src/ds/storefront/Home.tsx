@@ -137,7 +137,7 @@ export function Footer({ go }: { go: Go }) {
         {cols.map(([h, l]) => (
           <div key={h} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <span className="tbm-label" style={{ color: 'var(--gold-400)' }}>{h}</span>
-            {l.map((x) => <a key={x} href="#" onClick={(e) => { e.preventDefault(); go('menu'); }} style={{ color: 'var(--cream-100)', textDecoration: 'none', fontSize: 14 }}>{x}</a>)}
+            {l.map((x) => <a key={x} href="#" onClick={(e) => { e.preventDefault(); go('menu'); }} style={{ color: 'var(--cream-100)', textDecoration: 'none', fontSize: 14, display: 'inline-flex', alignItems: 'center', minHeight: 'var(--tap-sm, 0px)' }}>{x}</a>)}
           </div>
         ))}
       </div>

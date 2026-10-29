@@ -4,7 +4,7 @@ import { Icon } from '../core/Icon';
 export interface QuantityStepperProps { value?: number; min?: number; max?: number; onChange?: (v: number) => void; size?: 'sm' | 'md'; style?: CSSProperties }
 
 export function QuantityStepper({ value = 1, min = 1, max = 99, onChange, size = 'md', style }: QuantityStepperProps) {
-  const h = size === 'sm' ? 34 : 44;
+  const h: number | string = size === 'sm' ? 'var(--tap-sm, 34px)' : 44;
   const b = (dis: boolean): CSSProperties => ({ width: h, height: h, borderRadius: '50%', border: 'none', background: dis ? 'transparent' : 'var(--cream-0)', color: dis ? 'var(--cocoa-300)' : 'var(--cocoa-800)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: dis ? 'not-allowed' : 'pointer', boxShadow: dis ? 'none' : 'var(--shadow-1)' });
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: 3, background: 'var(--cream-200)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-body)', ...style }}>

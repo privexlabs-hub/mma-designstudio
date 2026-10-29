@@ -12,6 +12,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Android Chrome: shrink the layout when the keyboard opens, so editor sheets stay above it.
+  interactiveWidget: 'resizes-content',
   themeColor: [{ media: '(prefers-color-scheme: light)', color: '#FFFDF6' }, { media: '(prefers-color-scheme: dark)', color: '#2B140A' }],
 };
 

@@ -16,7 +16,7 @@ export function Checklist() {
     <div className="ds-stage" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 6 }}>
         <b style={{ fontSize: 15 }}>{count} of {CHECKLIST.length} checked</b>
-        <button type="button" className={p.btn} style={{ minHeight: 36 }} onClick={() => { setOn({}); try { localStorage.removeItem(KEY); } catch { /* storage unavailable */ } }}>Clear</button>
+        <button type="button" className={`${p.btn} ${p.btnSm}`} onClick={() => { setOn({}); try { localStorage.removeItem(KEY); } catch { /* storage unavailable */ } }}>Clear</button>
       </div>
       {CHECKLIST.map((c, i) => <Checkbox key={c} label={c} checked={!!on[i]} onChange={(v) => set(i, v)} />)}
       <span style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 6 }}>Use it before publishing any layout. Ticks are saved in this browser only.</span>

@@ -16,9 +16,9 @@ export function Library({ app }: { app: Studio }) {
   const list = TEMPLATES.filter((t) => q ? words.every((w) => hay(t).includes(w.replace(/[’']/g, ''))) : t.cat === st.cat);
   const nb = Object.keys(st.bulk).filter((k) => st.bulk[k]).length;
   const lim = st.limit || 24;
-  const phone = st.vw < 560;
-  // Thumbnails fit a smaller box on phones so two cards fit per row.
-  const tw = phone ? 136 : 216, thh = phone ? 132 : 168, boxH = phone ? 148 : 184;
+  const phone = st.vw < 560, tiny = st.vw < 370;
+  // Thumbnails fit a smaller box on phones so two cards fit per row (even on 320 px screens).
+  const tw = tiny ? 112 : phone ? 136 : 216, thh = tiny ? 116 : phone ? 132 : 168, boxH = tiny ? 132 : phone ? 148 : 184;
   const g = st.gen; const setG = (p: Partial<typeof g>) => app.setState({ gen: Object.assign({}, g, p) });
   const toggle = (id: string) => app.setState({ bulk: Object.assign({}, st.bulk, { [id]: !st.bulk[id] }) });
   return (
@@ -30,7 +30,7 @@ export function Library({ app }: { app: Studio }) {
             <h1>Pick a template, make it yours</h1>
           </div>
           <div className={s.libActions}>
-            <input type="search" placeholder="Search all templates" value={st.q} onChange={(e) => app.setState({ q: e.target.value })} aria-label="Search templates" className={s.search} />
+            <input type="search" enterKeyHint="search" autoCapitalize="off" autoCorrect="off" placeholder="Search all templates" value={st.q} onChange={(e) => app.setState({ q: e.target.value })} aria-label="Search templates" className={s.search} />
             <button type="button" onClick={() => app.setState({ selectMode: !st.selectMode })} className={`${s.pill} ${s.pill40} ${st.selectMode ? s.pillOn : ''}`} aria-pressed={st.selectMode}>{st.selectMode ? 'Done selecting' : 'Select for bulk export'}</button>
             <button type="button" onClick={() => document.getElementById('import-in')?.click()} className={`${s.pill} ${s.pill40}`}>Open project file</button>
           </div>
@@ -91,7 +91,7 @@ export function Library({ app }: { app: Studio }) {
                     <span className={s.cardSub}>{t.sub}</span>
                   </div>
                   {!!app.saved[t.id] && <span className={s.edited}>Edited</span>}
-                  {st.selectMode && <input type="checkbox" checked={ck} onChange={() => toggle(t.id)} aria-label={'Select ' + t.name + ' — ' + t.sub} className={s.check} />}
+                  {st.selectMode && <label style={{ display: 'grid', placeItems: 'center', minWidth: 44, minHeight: 44, margin: '-10px -10px -10px 0', cursor: 'pointer' }}><input type="checkbox" checked={ck} onChange={() => toggle(t.id)} aria-label={'Select ' + t.name + ' — ' + t.sub} className={s.check} /></label>}
                 </div>
               </div>
             );

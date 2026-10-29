@@ -62,7 +62,7 @@ export default function PlaybookPage() {
         <div className={p.card}><span className={p.cap}>Rules</span><ul className={p.list}>{PACKAGING.rules.map((r) => <li key={r}>{r}</li>)}</ul></div>
       </Section>
       <Section id="social" num="06" title="Social media" intro={SOCIAL.formats}>
-        <div className={p.grid4}>{SOCIAL.families.map((f) => <div key={f.name} className={p.card}><b>{f.name}</b><span className={p.small}>{f.detail}</span><Link href={'/studio/edit/' + encodeURIComponent(f.tpl)} className={p.btn} style={{ alignSelf: 'flex-start', minHeight: 36, fontSize: 13 }}>Open template</Link></div>)}</div>
+        <div className={p.grid4}>{SOCIAL.families.map((f) => <div key={f.name} className={p.card}><b>{f.name}</b><span className={p.small}>{f.detail}</span><Link href={'/studio/edit/' + encodeURIComponent(f.tpl)} className={`${p.btn} ${p.btnSm}`} style={{ alignSelf: 'flex-start', fontSize: 13 }}>Open template</Link></div>)}</div>
         <div className={p.card}><span className={p.cap}>Rules</span><ul className={p.list}>{SOCIAL.rules.map((r) => <li key={r}>{r}</li>)}</ul></div>
       </Section>
       <Section id="checklist" num="07" title="Quality checklist">

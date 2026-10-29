@@ -35,6 +35,13 @@ export function ExportDialog({ app }: { app: Studio }) {
   }
   g3.push({ label: 'Project file', sub: 'JSON — reopen & keep editing', onClick: () => void app.run('Project file', async () => X.json(d)) });
   const groups: [string, Item[]][] = [['Current page', g1], [multi ? 'All ' + d.pages.length + ' pages' : 'Whole design', g2], ['Editable & text formats', g3]];
+  // Phones: send the current page straight to WhatsApp, Instagram, Photos or Files.
+  if (X.canShareFiles('image/png')) groups.unshift(['Share from this device', [
+    { label: 'Share PNG', sub: 'Page ' + (P1 + 1) + ' · WhatsApp, Instagram, Photos', onClick: () => void app.sharePage(P1, 'png') },
+    { label: 'Share JPG', sub: 'Page ' + (P1 + 1) + ' · smaller file', onClick: () => void app.sharePage(P1, 'jpeg') },
+    { label: 'Share PDF', sub: 'Page ' + (P1 + 1) + ' · Files, email', onClick: () => void app.sharePage(P1, 'pdf') },
+  ]]);
+  const out = X.outputSize(d, st.scale);
   return (
     <div onClick={close} className={s.modalScrim}>
       <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="export-title" onClick={(e) => e.stopPropagation()} className={s.modal}>
@@ -48,6 +55,8 @@ export function ExportDialog({ app }: { app: Studio }) {
           {[1, 2, 3].map((x) => <button key={x} type="button" aria-pressed={st.scale === x} onClick={() => app.setState({ scale: x })} className={`${s.seg} ${st.scale === x ? s.segOn : ''}`}>{x}×</button>)}
           <label className={s.fieldInline} style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 6 }}>JPG quality<input type="range" min="0.5" max="1" step="0.02" value={st.jpgQ} onChange={(e) => app.setState({ jpgQ: +e.target.value })} style={{ width: 90, accentColor: '#C81F75' }} /></label>
         </div>
+        <span className={s.hint}>{'Image size: ' + out.w + ' × ' + out.h + ' px'}</span>
+        {out.capped && <span className={s.capNote}>{'This browser can’t draw images this large, so ' + st.scale + '× is reduced to ' + out.w + ' × ' + out.h + ' px — still sharp on any phone.'}</span>}
         {groups.map(([title, items]) => (
           <div key={title} className={s.col8}>
             <span className={s.cap}>{title}</span>

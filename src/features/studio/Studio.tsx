@@ -11,6 +11,7 @@ import { Library } from './Library';
 import { ExportDialog } from './ExportDialog';
 import { Artboard } from './Artboard';
 import { AppHeader } from '@/components/AppHeader';
+import { Icon } from '@/ds';
 import { EditorTools } from './EditorTools';
 import s from './studio.module.css';
 
@@ -22,6 +23,8 @@ export interface StudioState {
   zoomMode: string; canvasW: number; canvasH: number; vw: number; panel: Panel; preview: boolean; exportOpen: boolean; exporting: boolean;
   busy: string; toast: Toast | null; selectMode: boolean; bulk: Record<string, boolean>; gen: GenState; addKind: string; overflow: boolean;
   offDoc: Doc | null; scale: number; jpgQ: number; dragOver: number | null; hist: Doc[]; fut: Doc[]; limit: number;
+  /** Phone editor: expanded bottom sheet, measured sheet height, a file waiting to be shared. */
+  sheetFull: boolean; sheetH: number; sheetW: number; share: { file: File; title: string } | null;
 }
 export interface StudioProps { route: 'library' | 'edit'; tplId: string | null; cat: string | null; navigate: (href: string, replace?: boolean) => void }
 
@@ -30,7 +33,8 @@ const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
 const isCat = (c: string | null): c is CatId => !!c && CATS.some(([id]) => id === c);
 export const NARROW = 900;
 
-interface Drag { mode: 'move' | 'resize'; pi: number; id: string; sx: number; sy: number; o: { x: number; y: number; w: number; h: number }; z: number; moved: boolean }
+interface Drag { mode: 'move' | 'resize'; pi: number; id: string; sx: number; sy: number; o: { x: number; y: number; w: number; h: number }; z: number; moved: boolean; touch: boolean }
+interface Pinch { d0: number; z0: number; mx: number; my: number; sl: number; st: number }
 
 export class Studio extends Component<StudioProps, StudioState> {
   state: StudioState = {
@@ -38,6 +42,7 @@ export class Studio extends Component<StudioProps, StudioState> {
     preview: false, exportOpen: false, exporting: false, busy: '', toast: null, selectMode: false, bulk: {},
     gen: { title: '', sub: '', variant: 'edcocoa', ch: { xarticle: 1, liarticle: 1, lipost: 1, medium: 1, articlehero: 1, blogpromo: 1, nlpromo: 1 } },
     addKind: '', overflow: false, offDoc: null, scale: 1, jpgQ: 0.92, dragOver: null, hist: [], fut: [], limit: 24,
+    sheetFull: false, sheetH: 0, sheetW: 0, share: null,
   };
   saved: Record<string, Doc> = {};
   thumbs: Record<string, { node: ReactNode; w: number; h: number; key: string }> = {};
@@ -58,7 +63,14 @@ export class Studio extends Component<StudioProps, StudioState> {
     move: (e: PointerEvent) => this.dragMove(e),
     up: () => this.dragEnd(),
     unload: () => this.flush(),
+    vv: () => this.keyboard(),
+    tStart: (e: TouchEvent) => this.pinchStart(e),
+    tMove: (e: TouchEvent) => this.pinchMove(e),
+    tEnd: (e: TouchEvent) => { if (e.touches.length < 2) this.pinch = null; },
   };
+  pinch: Pinch | null = null;
+  pinchEl: HTMLElement | null = null;
+  prevOverscroll = '';
 
   componentDidMount() {
     try { this.saved = JSON.parse(localStorage.getItem(STORE) || '{}'); } catch { this.saved = {}; }
@@ -66,14 +78,47 @@ export class Studio extends Component<StudioProps, StudioState> {
     addEventListener('resize', this.h.resize); addEventListener('keydown', this.h.key); addEventListener('pointermove', this.h.move); addEventListener('pointerup', this.h.up); addEventListener('pointercancel', this.h.up); addEventListener('pagehide', this.h.unload);
     this.setState({ ready: true, vw: innerWidth }, () => this.route());
     this.iv = setInterval(() => { try { this.tick(); } catch { /* measurement only */ } }, 150);
+    // Phones: stop pull-to-refresh while dragging on the canvas, and track the on-screen keyboard (iOS).
+    this.prevOverscroll = document.documentElement.style.overscrollBehaviorY; document.documentElement.style.overscrollBehaviorY = 'contain';
+    window.visualViewport?.addEventListener('resize', this.h.vv); window.visualViewport?.addEventListener('scroll', this.h.vv);
+  }
+  /** iOS keeps the layout viewport when the keyboard opens; shrink the app to the visible part instead. */
+  keyboard() {
+    const vv = window.visualViewport; if (!vv) return; const root = document.documentElement;
+    const kb = Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop));
+    if (kb > 80) { root.style.setProperty('--kb', kb + 'px'); root.setAttribute('data-kb', ''); } else { root.style.removeProperty('--kb'); root.removeAttribute('data-kb'); }
+  }
+  pinchStart(e: TouchEvent) {
+    if (e.touches.length !== 2 || !this.pinchEl) return;
+    this.drag = null; const [a, b] = [e.touches[0], e.touches[1]]; const r = this.pinchEl.getBoundingClientRect();
+    this.pinch = { d0: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1, z0: this.zoom(), mx: (a.clientX + b.clientX) / 2 - r.left, my: (a.clientY + b.clientY) / 2 - r.top, sl: this.pinchEl.scrollLeft, st: this.pinchEl.scrollTop };
+  }
+  /** Two fingers: pinch to zoom around the fingers, move both to pan. */
+  pinchMove(e: TouchEvent) {
+    const p = this.pinch, sc = this.pinchEl; if (!p || !sc || e.touches.length !== 2) return; e.preventDefault();
+    const [a, b] = [e.touches[0], e.touches[1]]; const r = sc.getBoundingClientRect();
+    const z = Math.max(0.05, Math.min(3, p.z0 * Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) / p.d0));
+    const mx = (a.clientX + b.clientX) / 2 - r.left, my = (a.clientY + b.clientY) / 2 - r.top, k = z / p.z0;
+    this.setState({ zoomMode: String(+z.toFixed(3)) }, () => { sc.scrollLeft = (p.sl + p.mx) * k - mx; sc.scrollTop = (p.st + p.my) * k - my; });
   }
   componentWillUnmount() {
     const h = this.h; removeEventListener('resize', h.resize); removeEventListener('keydown', h.key); removeEventListener('pointermove', h.move); removeEventListener('pointerup', h.up); removeEventListener('pointercancel', h.up); removeEventListener('pagehide', h.unload);
     this.ro?.disconnect(); clearInterval(this.iv); this.flush();
+    document.documentElement.style.overscrollBehaviorY = this.prevOverscroll;
+    window.visualViewport?.removeEventListener('resize', this.h.vv); window.visualViewport?.removeEventListener('scroll', this.h.vv);
+    this.bindPinch(null); document.documentElement.style.removeProperty('--kb'); document.documentElement.removeAttribute('data-kb');
+  }
+  bindPinch(el: HTMLElement | null) {
+    if (this.pinchEl === el) return; const o = this.pinchEl, h = this.h;
+    if (o) { o.removeEventListener('touchstart', h.tStart); o.removeEventListener('touchmove', h.tMove); o.removeEventListener('touchend', h.tEnd); o.removeEventListener('touchcancel', h.tEnd); }
+    this.pinchEl = el;
+    if (el) { el.addEventListener('touchstart', h.tStart, { passive: true }); el.addEventListener('touchmove', h.tMove, { passive: false }); el.addEventListener('touchend', h.tEnd); el.addEventListener('touchcancel', h.tEnd); }
   }
   componentDidUpdate(prev: StudioProps, prevState: StudioState) {
     if (prev.route !== this.props.route || prev.tplId !== this.props.tplId || prev.cat !== this.props.cat) this.route();
     if (prevState.route !== this.state.route || prevState.doc?.name !== this.state.doc?.name || prevState.ready !== this.state.ready) this.title();
+    const st = this.state;
+    if (this.narrow() && (prevState.panel !== st.panel || prevState.sheetFull !== st.sheetFull || Math.abs(prevState.sheetH - st.sheetH) > 24 || Math.abs(prevState.sheetW - st.sheetW) > 24 || (prevState.selEl !== st.selEl && st.selEl && st.panel !== 'canvas'))) { this.pendingCenter = true; this.pendingSmooth = true; }
     this.tick();
   }
   /** Tab title (URL changes inside the studio don't re-run server metadata). */
@@ -85,6 +130,11 @@ export class Studio extends Component<StudioProps, StudioState> {
   /** Keep canvas size in state, centre the selected page when asked, and detect text overflow. */
   tick() {
     const sc = document.getElementById('canvas-scroll');
+    this.bindPinch(sc);
+    // A phone sheet covers the bottom of the canvas, or the right side when the phone is held sideways.
+    const sheet = document.querySelector<HTMLElement>('[data-sheet]'); const side = !!sheet && sheet.getBoundingClientRect().left > 1;
+    const sh = sheet && !side ? sheet.offsetHeight : 0, sw = sheet && side ? sheet.offsetWidth : 0;
+    if (Math.abs(sh - this.state.sheetH) > 2 || Math.abs(sw - this.state.sheetW) > 2) this.setState({ sheetH: sh, sheetW: sw });
     if (sc && sc !== this.roEl) {
       this.ro?.disconnect(); this.roEl = sc;
       this.ro = new ResizeObserver(() => { const w = sc.clientWidth, h = sc.clientHeight; if (Math.abs(w - this.state.canvasW) > 2 || Math.abs(h - this.state.canvasH) > 2) { this.pendingCenter = true; this.setState({ canvasW: w, canvasH: h }); } });
@@ -138,7 +188,12 @@ export class Studio extends Component<StudioProps, StudioState> {
   }
   center(smooth?: boolean) {
     const sc = document.getElementById('canvas-scroll'), pg = this.curPage(); if (!sc || !pg) return; const w = document.getElementById('pw-' + pg.id); if (!w) return;
-    const top = Math.max(0, w.offsetTop - (sc.clientHeight - w.offsetHeight) / 2), left = Math.max(0, w.offsetLeft - (sc.clientWidth - w.offsetWidth) / 2);
+    // On phones the tab bar and an open sheet cover the bottom of the canvas: centre in what's visible.
+    const nar = this.narrow(), bar = nar ? (document.querySelector<HTMLElement>('nav[aria-label="Editor"]')?.offsetHeight || 0) : 0;
+    const visH = Math.max(80, sc.clientHeight - bar - (nar ? this.state.sheetH : 0)), visW = Math.max(80, sc.clientWidth - (nar ? this.state.sheetW : 0));
+    let top = Math.max(0, w.offsetTop - (visH - w.offsetHeight) / 2), left = Math.max(0, w.offsetLeft - (visW - w.offsetWidth) / 2);
+    const elNode = nar && this.state.selEl && this.state.panel !== 'canvas' ? document.getElementById('el-' + this.state.selEl) : null;
+    if (elNode) { const er = elNode.getBoundingClientRect(), sr = sc.getBoundingClientRect(); top = Math.max(0, sc.scrollTop + er.top - sr.top + er.height / 2 - visH / 2); left = Math.max(0, sc.scrollLeft + er.left - sr.left + er.width / 2 - visW / 2); }
     const far = Math.abs(sc.scrollTop - top) > sc.clientHeight * 2.5 || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches;
     sc.scrollTo({ top, left, behavior: smooth && !far ? 'smooth' : 'auto' });
   }
@@ -166,10 +221,10 @@ export class Studio extends Component<StudioProps, StudioState> {
   startDrag(e: React.PointerEvent, pi: number, id: string, mode: 'move' | 'resize') {
     const st = this.state; if (st.preview || e.button || !st.doc) return; e.stopPropagation(); const el = st.doc.pages[pi].elements.find((x) => x.id === id); if (!el) return;
     if (st.selEl !== id || st.selPage !== pi) this.setState({ selPage: pi, selEl: id });
-    this.drag = { mode, pi, id, sx: e.clientX, sy: e.clientY, o: { x: el.x, y: el.y, w: el.w, h: el.h }, z: this.zoom(), moved: false };
+    this.drag = { mode, pi, id, sx: e.clientX, sy: e.clientY, o: { x: el.x, y: el.y, w: el.w, h: el.h }, z: this.zoom(), moved: false, touch: e.pointerType !== 'mouse' };
   }
   dragMove(e: PointerEvent) {
-    const g = this.drag; if (!g) return; const dx = (e.clientX - g.sx) / g.z, dy = (e.clientY - g.sy) / g.z; if (!g.moved && Math.abs(dx) + Math.abs(dy) < 3 / g.z) return;
+    const g = this.drag; if (!g) return; const dx = (e.clientX - g.sx) / g.z, dy = (e.clientY - g.sy) / g.z; if (!g.moved && Math.abs(dx) + Math.abs(dy) < (g.touch ? 8 : 3) / g.z) return; // a finger jitters more than a mouse
     if (!g.moved) { g.moved = true; this.mut(() => {}, 'hist'); }
     const prev = this.state.doc; if (!prev) return; const d = clone(prev); const el = d.pages[g.pi].elements.find((x) => x.id === g.id); if (!el) return;
     if (g.mode === 'move') { el.x = Math.round(g.o.x + dx); el.y = Math.round(g.o.y + dy); } else { el.w = Math.max(8, Math.round(g.o.w + dx)); el.h = Math.max(8, Math.round(g.o.h + dy)); }
@@ -267,6 +322,23 @@ export class Studio extends Component<StudioProps, StudioState> {
     this.setState({ busy: '', exporting: false });
   }
   async exportPage(i: number, type: X.ImageType) { const d = this.state.doc as Doc; await this.run(type.toUpperCase() + ' page ' + (i + 1), async () => { const b = await X.capture(this.nodes()[i], d, type, this.state.scale, this.state.jpgQ); X.save(b, X.fname(d, 'p' + String(i + 1).padStart(2, '0'), type === 'jpeg' ? 'jpg' : type)); }); }
+  /** Phones: render the page, then offer the native share sheet (needs a fresh tap, so it's a second step). */
+  async sharePage(i: number, type: 'png' | 'jpeg' | 'pdf') {
+    const d = this.state.doc as Doc; const label = (type === 'jpeg' ? 'JPG' : type.toUpperCase()) + ' page ' + (i + 1);
+    this.setState({ busy: 'Preparing ' + label + '…', exporting: true, exportOpen: false }); await this.frames(60);
+    try {
+      await this.imgsReady('ab-', d); const node = this.nodes()[i];
+      const blob = type === 'pdf' ? await X.pdf(Object.assign({}, d, { name: d.name + ' p' + (i + 1) }), [node], true) : await X.capture(node, d, type, this.state.scale, this.state.jpgQ);
+      const name = type === 'pdf' ? X.fname(Object.assign({}, d, { name: d.name + ' p' + (i + 1) }), '', 'pdf') : X.fname(d, 'p' + String(i + 1).padStart(2, '0'), type === 'jpeg' ? 'jpg' : 'png');
+      this.setState({ share: { file: new File([blob], name, { type: type === 'pdf' ? 'application/pdf' : 'image/' + type }), title: d.name } });
+    } catch (e) { console.error(e); this.toast('Could not prepare the file: ' + ((e as Error)?.message || e), 'error'); }
+    this.setState({ busy: '', exporting: false });
+  }
+  async shareNow() {
+    const sh = this.state.share; if (!sh) return;
+    try { const r = await X.shareFile(sh.file, sh.title); this.setState({ share: null }); if (r === 'shared') this.toast('Shared.', 'ok'); }
+    catch (e) { this.toast('Sharing is not available here — use Download instead. (' + ((e as Error)?.message || e) + ')', 'error'); }
+  }
   async exportZip(type: X.ImageType) {
     const d = this.state.doc as Doc;
     await this.run('All pages (' + type.toUpperCase() + ' ZIP)', async () => { const ns = this.nodes(), files = []; for (let i = 0; i < ns.length; i++) files.push({ name: X.fname(d, 'p' + String(i + 1).padStart(2, '0'), type === 'jpeg' ? 'jpg' : type), blob: await X.capture(ns[i], d, type, this.state.scale, this.state.jpgQ) }); await X.zipOf(files, X.fname(d, 'pages', 'zip')); });
@@ -323,6 +395,17 @@ export class Studio extends Component<StudioProps, StudioState> {
         <input type="file" accept="image/*" id="file-in" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void this.onFile(f); }} />
         <input type="file" accept="application/json,.json" id="import-in" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void this.onImport(f); }} />
         {isEdit && st.exportOpen && <ExportDialog app={this} />}
+        {st.share && (
+          <div role="dialog" aria-label="Share" className={s.shareCard}>
+            <b>Ready to share</b>
+            <span className={s.hint} style={{ overflowWrap: 'anywhere' }}>{st.share.file.name}</span>
+            <div className={s.wrapRow} style={{ gap: 8 }}>
+              <button type="button" className={s.pinkBtn} style={{ flex: 1 }} onClick={() => void this.shareNow()}><Icon name="share-2" size={16} />Share</button>
+              <button type="button" className={s.smallBtn} style={{ flex: 1 }} onClick={() => { const f = st.share!.file; X.save(f, f.name); this.setState({ share: null }); }}><Icon name="download" size={16} />Download</button>
+              <button type="button" className={s.smallBtn} onClick={() => this.setState({ share: null })} aria-label="Close">Close</button>
+            </div>
+          </div>
+        )}
         {!!st.busy && <div role="status" className={s.busy}><span className={s.spin} aria-hidden="true" />{st.busy}</div>}
         {st.toast && <div role="status" className={`${s.toast} ${st.toast.kind === 'error' ? s.toastErr : s.toastOk} ${isEdit && this.narrow() ? s.toastRaised : ''}`}>{st.toast.msg}</div>}
       </div>

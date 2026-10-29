@@ -1,5 +1,6 @@
 'use client';
-import { useState, type CSSProperties } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
+import { flushSync } from 'react-dom';
 import { Icon } from '@/ds';
 import { DOCS, ELEMENT_KINDS, PHOTOS, SWATCHES, TEMPLATES, V, FORMATS, PAGE_SIZES, pageKinds } from '@/lib/studio';
 import type { AddKind, Doc, El, ElPatch } from '@/lib/studio';
@@ -25,7 +26,7 @@ function Swatches({ app, label, cur, pick, none }: { app: Studio; label: string;
           <button key={c || 'none'} type="button" title={c || 'None'} aria-label={c || 'None'} aria-pressed={(cur || '').toUpperCase() === c.toUpperCase()} onClick={() => pick(c)} className={s.swatch}
             style={{ background: c || 'repeating-linear-gradient(45deg,#fff 0 4px,#F59AC6 4px 6px)', boxShadow: (cur || '').toUpperCase() === c.toUpperCase() ? '0 0 0 2px var(--a-surface), 0 0 0 4px #C81F75' : 'none' }} />
         ))}
-        <input key={cur || ''} aria-label={label + ' hex value'} defaultValue={cur || ''} className={s.hex}
+        <input key={cur || ''} aria-label={label + ' hex value'} defaultValue={cur || ''} className={s.hex} autoCapitalize="off" autoCorrect="off" autoComplete="off" spellCheck={false} enterKeyHint="done"
           onBlur={(e) => { const v = e.target.value.trim(); if (v === (cur || '')) return; if (/^#[0-9a-f]{6}$/i.test(v) || (none && v === '') || v === 'transparent') pick(v); else { app.toast('Use a 6-digit hex value like #3D1D10.', 'error'); e.target.value = cur || ''; } }}
           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} />
       </div>
@@ -33,28 +34,64 @@ function Swatches({ app, label, cur, pick, none }: { app: Studio; label: string;
   );
 }
 
-/** Number input that keeps the typed text while focused (so it can be cleared and retyped). */
-function DraftNumber({ value, step, onValue, label, className, style, inputMode = 'decimal' }: { value: number | undefined; step: number; onValue: (v: number) => void; label?: string; className?: string; style?: CSSProperties; inputMode?: 'decimal' | 'numeric' }) {
+/** Number input that keeps the typed text while focused (so it can be cleared and retyped).
+    `signed` fields skip the decimal keypad, which has no minus key on iPhone. */
+function DraftNumber({ value, step, onValue, label, className, style, inputMode = 'decimal', signed }: { value: number | undefined; step: number; onValue: (v: number) => void; label?: string; className?: string; style?: CSSProperties; inputMode?: 'decimal' | 'numeric'; signed?: boolean }) {
   const [draft, setDraft] = useState<string | null>(null);
   return (
-    <input type="number" inputMode={inputMode} step={step} aria-label={label} className={className} style={style}
+    <input type="number" inputMode={signed ? undefined : inputMode} step={step} aria-label={label} className={className} style={style} enterKeyHint="done"
       value={draft ?? (value ?? '')}
       onFocus={() => setDraft(value == null ? '' : String(value))}
       onBlur={() => setDraft(null)}
+      onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
       onChange={(e) => { setDraft(e.target.value); const v = parseFloat(e.target.value); if (!isNaN(v)) onValue(v); }} />
   );
 }
 
-function NumField({ label, value, step, onValue }: { label: string; value: number | undefined; step: number; onValue: (v: number) => void }) {
-  return <label className={s.numLabel}>{label}<DraftNumber value={value} step={step} onValue={onValue} className={s.num} /></label>;
+/** Number field; with `stepper`, touch screens also get −/+ buttons for one-handed nudging. */
+function NumField({ label, value, step, onValue, signed, stepper, nudge }: { label: string; value: number | undefined; step: number; onValue: (v: number) => void; signed?: boolean; stepper?: boolean; nudge?: number }) {
+  const n = nudge || step, v = value ?? 0, round = (x: number) => +x.toFixed(4);
+  if (!stepper) return <label className={s.numLabel}>{label}<DraftNumber value={value} step={step} onValue={onValue} className={s.num} signed={signed} /></label>;
+  return (
+    <div className={s.numLabel}>
+      <span>{label}</span>
+      <div className={s.stepper}>
+        <button type="button" className={s.stepBtn} aria-label={'Decrease ' + label} onClick={() => onValue(round(v - n))}><Icon name="minus" size={16} /></button>
+        <DraftNumber value={value} step={step} onValue={onValue} className={s.num} signed={signed} label={label} />
+        <button type="button" className={s.stepBtn} aria-label={'Increase ' + label} onClick={() => onValue(round(v + n))}><Icon name="plus" size={16} /></button>
+      </div>
+    </div>
+  );
 }
+
+/** Drag handle on phone sheets: tap to expand/shrink, swipe up to expand, swipe down to shrink or close. */
+function SheetHandle({ app }: { app: Studio }) {
+  const start = useRef<number | null>(null); const full = app.state.sheetFull;
+  return (
+    <button type="button" className={s.sheetHandle} aria-label={full ? 'Shrink panel' : 'Expand panel'} aria-expanded={full}
+      onPointerDown={(e) => { start.current = e.clientY; try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* not supported */ } }}
+      onPointerUp={(e) => { const y0 = start.current; start.current = null; if (y0 == null) return; const dy = e.clientY - y0;
+        if (Math.abs(dy) < 10) app.setState({ sheetFull: !full }); else if (dy < -40) app.setState({ sheetFull: true }); else if (dy > 40) { if (full) app.setState({ sheetFull: false }); else app.setState({ panel: 'canvas' }); } }}
+      onPointerCancel={() => { start.current = null; }}
+      onClick={(e) => { if (e.detail === 0) app.setState({ sheetFull: !full }); }}>
+      <span />
+    </button>
+  );
+}
+
+/** Phones: once a field is focused, keep it in view above the keyboard. */
+const keepInView = (e: React.FocusEvent) => {
+  const t = e.target as HTMLElement; if (!/INPUT|TEXTAREA|SELECT/.test(t.tagName) || !matchMedia('(max-width: 899px)').matches) return;
+  setTimeout(() => t.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 300);
+};
 
 function PagesPanel({ app }: { app: Studio }) {
   const st = app.state, d = st.doc as Doc, pg = d.pages[st.selPage] || d.pages[0], narrow = app.narrow();
   const kinds = pageKinds(d);
   const kindLabel = (p: Doc['pages'][number]) => d.mode === 'doc' && p.kind && d.docType ? DOCS[d.docType].kinds[p.kind].label : (typeof p.spec === 'string' && V[p.spec] ? V[p.spec].name : 'Page');
   return (
-    <aside className={`${s.nav} ${narrow ? s.sheet : ''}`} aria-label="Pages and layers">
+    <aside className={`${s.nav} ${narrow ? s.sheet : ''} ${narrow && st.sheetFull ? s.sheetFull : ''}`} aria-label="Pages and layers" data-sheet={narrow ? '' : undefined} onFocus={keepInView}>
+      {narrow && <SheetHandle app={app} />}
       <div className={s.navHead}>
         <div className={s.rowBetween}><Cap>Pages · {d.pages.length}</Cap>{narrow && <button type="button" className={s.close} onClick={() => app.setState({ panel: 'canvas' })}>Close</button>}</div>
         {kinds.length > 0 && (
@@ -112,17 +149,19 @@ function PagesPanel({ app }: { app: Studio }) {
 
 function Canvas({ app }: { app: Studio }) {
   const st = app.state, d = st.doc as Doc, z = app.zoom(), narrow = app.narrow();
+  const touch = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches;
   const interact = (pi: number): Interact => ({
-    preview: st.preview,
+    preview: st.preview, touch,
     selected: (el) => !st.preview && !st.exporting && st.selPage === pi && st.selEl === el.id,
     onElDown: (e, el, mode) => app.startDrag(e, pi, el.id, mode),
     onElDbl: () => { app.setState({ panel: 'edit' }); setTimeout(() => { const t = document.getElementById('insp-text'); if (t) t.focus(); }, 50); },
     onBoardDown: (e) => { if (e.button) return; app.setState({ selPage: pi, selEl: null }); },
   });
-  const col: CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: narrow ? 28 : 48, padding: narrow ? '64px 12px 96px' : '40px 32px', minWidth: 'fit-content', boxSizing: 'border-box', minHeight: '100%', justifyContent: d.pages.length === 1 ? 'center' : 'flex-start' };
+  const col: CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: narrow ? 28 : 48, padding: narrow ? '72px ' + (12 + st.sheetW) + 'px ' + (110 + st.sheetH) + 'px 12px' : '40px 32px', minWidth: 'fit-content', boxSizing: 'border-box', minHeight: '100%', justifyContent: d.pages.length === 1 ? 'center' : 'flex-start' };
   return (
     <div className={s.canvasWrap}>
       {narrow && <EditorTools app={app} floating />}
+      {narrow && !st.preview && st.panel === 'canvas' && st.selEl && <SelectionBar app={app} />}
       <div id="canvas-scroll" className={s.canvas} onPointerDown={(e) => { if (e.target === e.currentTarget || e.target === e.currentTarget.firstChild) app.setState({ selEl: null }); }}>
         <div style={col}>
           {d.pages.map((p, i) => (
@@ -140,6 +179,28 @@ function Canvas({ app }: { app: Studio }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Phones: actions for the selected element, so nothing needs a double-tap or a hidden menu. */
+function SelectionBar({ app }: { app: Studio }) {
+  const el = app.curEl(); if (!el) return null;
+  const textual = ['text', 'table', 'toc', 'chart', 'pageno'].includes(el.type);
+  const edit = () => {
+    // Render the sheet synchronously so the text field can take focus inside this tap (iOS only opens the keyboard then).
+    flushSync(() => app.setState({ panel: 'edit' }));
+    if (textual) { const t = document.getElementById('insp-text') as HTMLTextAreaElement | null; if (t) { t.focus(); const n = t.value.length; try { t.setSelectionRange(n, n); } catch { /* not a text field */ } } }
+  };
+  const B = ({ icon, label, onClick, cls }: { icon: string; label: string; onClick: () => void; cls?: string }) => <button type="button" className={`${s.selBtn} ${cls || ''}`} onClick={onClick}><Icon name={icon} size={18} />{label}</button>;
+  return (
+    <div className={s.selBar} role="toolbar" aria-label="Selected element">
+      <B icon={textual ? 'pencil' : 'sliders-horizontal'} label={textual ? 'Edit text' : 'Edit'} onClick={edit} cls={s.selBtnPink} />
+      <B icon="copy" label="Duplicate" onClick={() => app.dupEl()} />
+      <B icon="arrow-up" label="Forward" onClick={() => app.zEl(el.id, 'up')} />
+      <B icon="arrow-down" label="Back" onClick={() => app.zEl(el.id, 'down')} />
+      <B icon="trash-2" label="Delete" onClick={() => app.delEl()} cls={s.selBtnDanger} />
+      <B icon="check" label="Done" onClick={() => app.setState({ selEl: null })} />
     </div>
   );
 }
@@ -163,7 +224,7 @@ function ElementInspector({ app, el }: { app: Studio; el: El }) {
       </div>
       {hasTextField && (
         <label className={s.fieldCap}>{TEXT_LABEL[t] || 'Text'}
-          <textarea id="insp-text" value={el.text || ''} onChange={(e) => upd({ text: e.target.value }, 'coalesce')} rows={t === 'text' && (el.text || '').length > 120 ? 8 : 4} className={s.textarea} />
+          <textarea id="insp-text" autoCapitalize="sentences" value={el.text || ''} onChange={(e) => upd({ text: e.target.value }, 'coalesce')} rows={t === 'text' && (el.text || '').length > 120 ? 8 : 4} className={s.textarea} />
           <span className={s.hint}>{TEXT_HINT[t]}</span>
         </label>
       )}
@@ -181,8 +242,8 @@ function ElementInspector({ app, el }: { app: Studio; el: El }) {
             <select aria-label="Weight" value={String(el.weight)} onChange={(e) => upd({ weight: +e.target.value })} className={s.select36}><option value="400">Regular 400</option><option value="500">Medium 500</option><option value="600">Semibold 600</option><option value="700">Bold 700</option><option value="800">Black 800</option></select>
           </div>
           <div className={s.numGrid}>
-            {([['Size', 'size', 1, 4], ['Line height', 'lh', 0.05, 0.6], ['Letter sp. (em)', 'ls', 0.01], ['Padding', 'pad', 1, 0], ['Radius', 'radius', 1, 0]] as [string, keyof ElPatch, number, number?][]).map(([label, k, step, mn]) => (
-              <NumField key={k} label={label} step={step} value={el[k] as number | undefined} onValue={(v) => upd({ [k]: mn != null ? Math.max(mn, v) : v }, 'coalesce')} />
+            {([['Size', 'size', 1, 4, 2], ['Line height', 'lh', 0.05, 0.6, 0.05], ['Letter sp. (em)', 'ls', 0.01, undefined, 0.01], ['Padding', 'pad', 1, 0, 2], ['Radius', 'radius', 1, 0, 2]] as [string, keyof ElPatch, number, number | undefined, number][]).map(([label, k, step, mn, nudge]) => (
+              <NumField key={k} label={label} step={step} nudge={nudge} stepper signed={k === 'ls'} value={el[k] as number | undefined} onValue={(v) => upd({ [k]: mn != null ? Math.max(mn, v) : v }, 'coalesce')} />
             ))}
           </div>
           <div className={s.wrapRow4}>
@@ -232,7 +293,7 @@ function ElementInspector({ app, el }: { app: Studio; el: El }) {
       <div className={s.col8}>
         <Cap>Position & size (px)</Cap>
         <div className={s.grid4}>
-          {([['X', 'x'], ['Y', 'y'], ['W', 'w'], ['H', 'h']] as const).map(([label, k]) => <NumField key={k} label={label} step={1} value={el[k]} onValue={(v) => upd({ [k]: Math.round(v) }, 'coalesce')} />)}
+          {([['X', 'x'], ['Y', 'y'], ['W', 'w'], ['H', 'h']] as const).map(([label, k]) => <NumField key={k} label={label} step={1} nudge={5} stepper signed={k === 'x' || k === 'y'} value={el[k]} onValue={(v) => upd({ [k]: k === 'w' || k === 'h' ? Math.max(8, Math.round(v)) : Math.round(v) }, 'coalesce')} />)}
         </div>
         <div className={s.wrapRow4}>
           <button type="button" className={s.smallBtn} onClick={() => upd({ x: Math.round((d.w - el.w) / 2) })}>Centre horizontally</button>
@@ -302,7 +363,8 @@ function PageInspector({ app }: { app: Studio }) {
 function Inspector({ app }: { app: Studio }) {
   const st = app.state, el = app.curEl(), narrow = app.narrow();
   return (
-    <aside className={`${s.insp} ${narrow ? s.sheet : ''}`} aria-label="Properties">
+    <aside className={`${s.insp} ${narrow ? s.sheet : ''} ${narrow && st.sheetFull ? s.sheetFull : ''}`} aria-label="Properties" data-sheet={narrow ? '' : undefined} onFocus={keepInView}>
+      {narrow && <SheetHandle app={app} />}
       <div className={s.inspHead}>
         <Cap>{el ? ELEMENT_KINDS[el.type] : 'Page & document'}</Cap>
         <div style={{ display: 'flex', gap: 6 }}>

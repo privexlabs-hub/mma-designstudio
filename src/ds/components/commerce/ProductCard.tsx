@@ -39,7 +39,7 @@ export function ProductCard({ image, name, description, price, priceFrom, catego
           <Price amount={price} from={priceFrom} />
           {onAdd && (
             <button type="button" aria-label={addLabel + ' ' + name} onClick={(e) => { e.stopPropagation(); onAdd(); }}
-              style={{ height: 40, padding: '0 14px 0 10px', borderRadius: 20, border: 'none', background: 'var(--action-primary)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+              style={{ height: 'var(--tap-sm, 40px)', padding: '0 14px 0 10px', borderRadius: 22, border: 'none', background: 'var(--action-primary)', color: '#fff', fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 14, display: 'inline-flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
               <Icon name="plus" size={18} />{addLabel}
             </button>
           )}

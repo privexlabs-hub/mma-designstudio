@@ -42,7 +42,7 @@ function Card({ a }: { a: Asset }) {
         <div className={f.metaTop}><b>{a.name}</b><Badge tone={a.tag[1]} size="sm">{a.tag[0]}</Badge></div>
         <span className={p.small}>PNG · {a.w} × {a.h} px · {size(a.bytes)}</span>
         <p className={p.small} style={{ margin: 0 }}>{a.note}</p>
-        <a className={p.btn} href={a.file} download={base(a.file)} style={{ alignSelf: 'flex-start', minHeight: 36, fontSize: 13 }}><Icon name="download" size={14} />Download</a>
+        <a className={`${p.btn} ${p.btnSm}`} href={a.file} download={base(a.file)} style={{ alignSelf: 'flex-start', fontSize: 13 }}><Icon name="download" size={14} />Download</a>
       </figcaption>
     </figure>
   );
@@ -60,7 +60,7 @@ export default function AssetsPage() {
         <div className={p.tableWrap}>
           <table className={p.table}>
             <thead><tr><th>File</th><th>Contents</th><th><span className="sr-only">Download</span></th></tr></thead>
-            <tbody>{TOKENS.map(([n, href, d]) => <tr key={n}><td><code>{n}</code></td><td>{d}</td><td style={{ textAlign: 'right' }}><a className={p.btn} href={href} download={base(href)} aria-label={'Download ' + n} style={{ minHeight: 36, padding: '0 12px' }}><Icon name="download" size={14} /></a></td></tr>)}</tbody>
+            <tbody>{TOKENS.map(([n, href, d]) => <tr key={n}><td><code>{n}</code></td><td>{d}</td><td style={{ textAlign: 'right' }}><a className={`${p.btn} ${p.btnSm}`} href={href} download={base(href)} aria-label={'Download ' + n} style={{ padding: '0 12px' }}><Icon name="download" size={14} /></a></td></tr>)}</tbody>
           </table>
         </div>
       </Section>

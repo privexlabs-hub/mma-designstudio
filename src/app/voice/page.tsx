@@ -59,7 +59,7 @@ export default function VoicePage() {
             <div key={i} className={p.card} style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
               <span style={{ color: '#C81F75', display: 'flex' }}><Icon name={x.icon} size={22} /></span>
               <span style={{ flex: 1, minWidth: 0 }}><span className={p.cap}>{x.label}</span><br /><b style={{ overflowWrap: 'anywhere' }}>{x.value}</b></span>
-              {x.href ? <a className={p.btn} href={x.href} target="_blank" rel="noopener noreferrer" aria-label={'Open ' + x.label + ' ' + x.value} style={{ minHeight: 36, padding: '0 12px' }}><Icon name="external-link" size={14} /></a> : <CopyButton text={x.value} />}
+              {x.href ? <a className={`${p.btn} ${p.btnSm}`} href={x.href} target="_blank" rel="noopener noreferrer" aria-label={'Open ' + x.label + ' ' + x.value} style={{ padding: '0 12px' }}><Icon name="external-link" size={14} /></a> : <CopyButton text={x.value} />}
             </div>
           ))}
         </div>

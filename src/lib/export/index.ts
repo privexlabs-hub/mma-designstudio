@@ -31,8 +31,40 @@ export function fontCSS(): Promise<string> {
 
 export const fname = (doc: Doc, extra: string, ext: string): string => 'treats-by-mma_' + slug(doc.name) + (extra ? '_' + extra : '') + '_' + doc.w + 'x' + doc.h + '.' + ext;
 export function save(blob: Blob, name: string): void {
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  const url = URL.createObjectURL(blob);
+  // Very old mobile browsers ignore the download attribute: open the file so it can be long-pressed and saved.
+  if (typeof HTMLAnchorElement !== 'undefined' && !('download' in HTMLAnchorElement.prototype)) { window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 60000); return; }
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+/** Native share sheet (WhatsApp, Instagram, Save to Photos/Files) for a file, where the browser supports it. */
+export function canShareFiles(type = 'image/png'): boolean {
+  try { return typeof navigator !== 'undefined' && !!navigator.canShare && navigator.canShare({ files: [new File([new Blob([''], { type })], 'x', { type })] }); } catch { return false; }
+}
+export async function shareFile(file: File, title: string): Promise<'shared' | 'cancelled'> {
+  try { await navigator.share({ files: [file], title }); return 'shared'; }
+  catch (e) { if ((e as Error)?.name === 'AbortError') return 'cancelled'; throw e; }
+}
+
+/* iPhone/iPad browsers (all WebKit) and desktop Safari refuse canvases above ~16.7 megapixels; other
+   browsers allow more but phones run out of memory, so they get a generous 32 MP cap. */
+const MP_LIMITED = 16_000_000, MP_DEFAULT = 32_000_000;
+export function canvasLimit(): number {
+  if (typeof navigator === 'undefined') return MP_DEFAULT;
+  const ua = navigator.userAgent, ios = /iP(hone|ad|od)/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const safari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg|Android/.test(ua);
+  return ios || safari ? MP_LIMITED : MP_DEFAULT;
+}
+/** Pixel ratio actually used for a capture: the requested ratio, reduced if it would exceed the canvas limit. */
+export function safeRatio(doc: Doc, ratio: number, limit = canvasLimit()): number {
+  const max = Math.sqrt(limit / (doc.w * doc.h));
+  return Math.min(ratio, Math.floor(max * 1000) / 1000);
+}
+/** Output size in px for a page at an export scale, after the canvas-limit guard. */
+export function outputSize(doc: Doc, mult?: number, limit?: number): { w: number; h: number; capped: boolean } {
+  const want = scaleFor(doc, mult), r = safeRatio(doc, want, limit);
+  return { w: Math.round(doc.w * r), h: Math.round(doc.h * r), capped: r < want };
 }
 const dataToBlob = async (d: string) => (await fetch(d)).blob();
 /** any src → PNG data URL + blob, capped at 1600 px */
@@ -47,7 +79,7 @@ export const scaleFor = (doc: Doc, mult?: number): number => { const f = FORMATS
 export type ImageType = 'png' | 'jpeg' | 'svg';
 export async function capture(node: HTMLElement, doc: Doc, type: ImageType, mult?: number, quality?: number): Promise<Blob> {
   const H = await h2i(); const fontEmbedCSS = await fontCSS();
-  const opt = { width: doc.w, height: doc.h, pixelRatio: scaleFor(doc, mult), fontEmbedCSS, cacheBust: false, style: { transform: 'none', margin: '0', boxShadow: 'none' }, quality: quality || 0.92, backgroundColor: type === 'jpeg' ? '#FFFFFF' : undefined };
+  const opt = { width: doc.w, height: doc.h, pixelRatio: safeRatio(doc, scaleFor(doc, mult)), fontEmbedCSS, cacheBust: false, style: { transform: 'none', margin: '0', boxShadow: 'none' }, quality: quality || 0.92, backgroundColor: type === 'jpeg' ? '#FFFFFF' : undefined };
   if (type === 'svg') return dataToBlob(await H.toSvg(node, opt));
   if (type === 'jpeg') return dataToBlob(await H.toJpeg(node, opt));
   const b = await H.toBlob(node, opt); if (!b) throw new Error('Could not render the page'); return b;

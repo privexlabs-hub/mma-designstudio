@@ -17,7 +17,7 @@ export function NavBar({ logoSrc, links = [], active, onNavigate, cartCount = 0,
         <nav style={{ display: 'flex', gap: 4, flex: 1, justifyContent: 'center' }}>
           {links.map((l) => {
             const on = active === l.id;
-            return <a key={l.id} href="#" onClick={(e) => { e.preventDefault(); onNavigate?.(l.id); }} style={{ padding: '10px 14px', borderRadius: 'var(--radius-pill)', textDecoration: 'none', fontSize: 15, fontWeight: on ? 800 : 600, color: on ? 'var(--icing-700)' : 'var(--cocoa-800)', background: on ? 'var(--icing-50)' : 'transparent' }}>{l.label}</a>;
+            return <a key={l.id} href="#" onClick={(e) => { e.preventDefault(); onNavigate?.(l.id); }} style={{ padding: '10px 14px', minHeight: 'var(--tap-sm, 0px)', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', borderRadius: 'var(--radius-pill)', textDecoration: 'none', fontSize: 15, fontWeight: on ? 800 : 600, color: on ? 'var(--icing-700)' : 'var(--cocoa-800)', background: on ? 'var(--icing-50)' : 'transparent' }}>{l.label}</a>;
           })}
         </nav>
       )}

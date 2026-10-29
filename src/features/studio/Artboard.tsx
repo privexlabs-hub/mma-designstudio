@@ -12,6 +12,8 @@ export interface Interact {
   onElDbl: (el: El) => void;
   onBoardDown: (e: RPointerEvent) => void;
   preview: boolean;
+  /** Touch screen: bigger resize-handle hit area. */
+  touch?: boolean;
 }
 
 function tStyle(e: El): CSSProperties {
@@ -93,7 +95,7 @@ function element(el: El, pg: Page, pi: number, d: Doc, z: number, it: Interact |
       <div data-sel="1" style={{ position: 'absolute', inset: 0, outline: (2 / z) + 'px solid #C81F75', outlineOffset: (1 / z) + 'px', pointerEvents: 'none' }} />
       {/* Resize handle: larger hit area on touch screens, same visual size. */}
       <div data-sel="1" onPointerDown={(e) => it.onElDown(e, el, 'resize')} style={{ position: 'absolute', right: -7 / z, bottom: -7 / z, width: 14 / z, height: 14 / z, borderRadius: 999, background: '#fff', border: (2 / z) + 'px solid #C81F75', boxSizing: 'border-box', cursor: 'nwse-resize', touchAction: 'none' }}>
-        <div style={{ position: 'absolute', inset: -10 / z }} />
+        <div style={{ position: 'absolute', inset: (it.touch ? -16 : -10) / z }} />
       </div>
     </>
   );
@@ -116,7 +118,7 @@ export interface ArtboardProps {
 export function Artboard({ doc, page, index, z, prefix, interact, lite }: ArtboardProps) {
   return (
     <div id={prefix + page.id} onPointerDown={interact ? interact.onBoardDown : undefined}
-      style={{ position: 'relative', width: doc.w, height: doc.h, background: page.bg, overflow: 'hidden', transform: z === 1 ? 'none' : 'scale(' + z + ')', transformOrigin: '0 0', fontFamily: FONTS.body, userSelect: 'none', WebkitUserSelect: 'none' }}>
+      style={{ position: 'relative', width: doc.w, height: doc.h, background: page.bg, overflow: 'hidden', transform: z === 1 ? 'none' : 'scale(' + z + ')', transformOrigin: '0 0', fontFamily: FONTS.body, userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' } as CSSProperties}>
       {page.elements.map((el) => element(el, page, index, doc, z, interact || null, !!lite))}
     </div>
   );

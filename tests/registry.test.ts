@@ -161,3 +161,17 @@ describe('display-word fitting (post-prototype templates)', () => {
     }
   });
 });
+
+import { outputSize, safeRatio } from '@/lib/export';
+describe('phone export guard', () => {
+  const story = BUILD['story:announce'](), yt = BUILD['ytbanner:brand']();
+  it('caps exports under the iPhone canvas limit (16 MP)', () => {
+    for (const d of [story, yt]) for (const m of [1, 2, 3]) { const o = outputSize(d, m, 16_000_000); expect(o.w * o.h, d.formatId + ' ' + m + '×').toBeLessThanOrEqual(16_000_000); }
+    expect(outputSize(story, 3, 16_000_000).capped).toBe(true);
+    expect(outputSize(story, 1, 16_000_000)).toEqual({ w: 1080, h: 1920, capped: false });
+  });
+  it('leaves sizes that fit untouched', () => {
+    expect(safeRatio(story, 2, 16_000_000)).toBe(2);
+    expect(safeRatio(BUILD['admrec:adproduct'](), 2, 16_000_000)).toBe(2); // 300×250 exports at 600 px wide → 2× base
+  });
+});

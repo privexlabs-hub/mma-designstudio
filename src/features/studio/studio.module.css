@@ -162,3 +162,86 @@
   .cardMeta{flex-wrap:wrap;padding:0 2px 2px}
 }
 @media (max-width:379px){.floatTools .zoom{max-width:96px;padding:0 6px}}
+
+/* ---------- phone first ----------
+   Touch screens and narrow windows: fields at 16px (iPhone Safari zooms into smaller ones) and
+   controls at least 44px tall. Desktop with a mouse keeps the compact sizes above. */
+.stepBtn{display:none}
+.stepper{display:flex;align-items:stretch;gap:4px;min-width:0}
+.stepper > input{flex:1;min-width:0}
+.sheetHandle{display:none}
+.selBar{display:none}
+.shareCard{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom) + var(--kb,0px));z-index:32;margin:0 auto;max-width:420px;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;background:var(--a-surface);border:1px solid var(--a-border);box-shadow:0 16px 36px -12px rgba(30,13,6,.45);box-sizing:border-box}
+.shareCard b{font:800 15px var(--font-body)}
+.capNote{font:600 12px/1.4 var(--font-body);color:#8F6410;background:#FCF1CC;border-radius:10px;padding:8px 10px}
+
+@media (pointer:coarse),(max-width:899px){
+  .input40,.input38,.input36,.select36,.num,.search,.zoom,.textarea{font-size:16px}
+  .input40,.input38,.input36,.select36,.num,.search,.zoom{height:44px}
+  .hex{height:44px;width:112px;font-size:16px;border-radius:10px}
+  .pill,.pill40{height:44px}
+  .round,.floatTools .round{width:44px;height:44px}
+  .floatTools .zoom,.floatTools .segTall{height:44px;min-width:44px}
+  .seg,.segTall{height:44px;min-width:44px;padding:0 14px;font-size:13px}
+  .smallBtn,.pinkBtn,.dangerBtn{min-height:44px;height:auto;padding:6px 16px;font-size:13px;text-align:center}
+  .linkBtn,.close{min-height:44px;padding:0 8px;font-size:14px}
+  .mini{width:44px;height:44px;border-radius:10px}
+  .swRow{gap:4px}
+  .swatch{width:40px;height:40px}
+  .swatch::after{inset:-2px}
+  .pngBtn{height:44px;padding:0 16px;font-size:13px}
+  .layerBtn{min-height:44px;font-size:14px}
+  .pageBtn{min-height:52px}
+  .pageNum{width:30px;height:30px}
+  .addBtn{min-height:64px;font-size:13px}
+  .overflowBtn{min-height:44px;height:auto}
+  .exBtn{min-height:60px}
+  .check{width:24px;height:24px}
+  .tab{min-height:56px;font-size:12px}
+  .rangeLabel input,.modal input[type=range]{height:44px}
+  .numGrid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stepBtn{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:0;border-radius:10px;border:1px solid var(--a-border);background:var(--a-surface);color:var(--a-fg);cursor:pointer;touch-action:manipulation}
+  .stepBtn:active{background:var(--a-sunken)}
+  .numLabel{gap:4px;font-size:12px}
+  .field,.fieldInline{font-size:13px}
+  .hint{font-size:13px}
+  .cap{font-size:12px}
+  .muted{font-size:15px}
+}
+
+/* phone editor: resizable sheets, selection bar, keyboard-aware sizing */
+@media (max-width:899px){
+  .app{height:100vh;height:calc(100dvh - var(--kb,0px))}
+  .sheet{height:var(--sheet-h,48%);max-height:calc(100% - 64px - env(safe-area-inset-bottom));transition:height var(--dur-base) var(--ease-out)}
+  .sheetFull{--sheet-h:calc(100% - 72px - env(safe-area-inset-bottom))}
+  .sheetHandle{display:flex;justify-content:center;align-items:center;flex:none;height:44px;width:100%;border:0;background:none;cursor:grab;touch-action:none;padding:0;margin-bottom:-8px}
+  .sheetHandle span{width:44px;height:5px;border-radius:999px;background:var(--a-border)}
+  .navHead{padding-top:4px}
+  .inspHead{padding-top:4px}
+  .selBar{display:flex;position:absolute;left:8px;right:8px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:5;gap:4px;padding:6px;border-radius:18px;background:var(--a-surface);border:1px solid var(--a-border);box-shadow:0 8px 24px -10px rgba(30,13,6,.35);overflow-x:auto;scrollbar-width:none;margin:0 auto;max-width:560px;box-sizing:border-box}
+  .selBar::-webkit-scrollbar{display:none}
+  .selBtn{flex:1 0 auto;min-width:52px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;border-radius:12px;background:none;color:var(--a-fg);font:700 11px var(--font-body);cursor:pointer;padding:4px 6px}
+  .selBtn:active{background:var(--a-sunken)}
+  .selBtnPink{color:#C81F75}
+  .selBtnDanger{color:#AD1660}
+  [data-theme="dark"] .selBtnDanger{color:#F59AC6}
+  .canvas{touch-action:pan-x pan-y}
+  html[data-kb] .tabbar,html[data-kb] .selBar,html[data-kb] .floatTools{display:none}
+  html[data-kb] .sheet{bottom:0;max-height:100%;--sheet-h:100%}
+}
+/* phones held sideways: panels slide in from the right instead of covering the short screen */
+@media (max-width:899px) and (max-height:520px) and (orientation:landscape){
+  .sheet,.sheetFull,.sheet.nav,.sheet.insp{left:auto;right:0;top:0;width:min(50%,400px);height:auto;max-height:none;bottom:calc(56px + env(safe-area-inset-bottom));border-top:0;border-left:1px solid var(--a-border);border-radius:20px 0 0 20px;box-shadow:-16px 0 36px -12px rgba(30,13,6,.35);transition:none}
+  .sheetHandle{display:none}
+  .selBar{right:auto;left:8px;max-width:calc(50% - 16px)}
+  .floatTools{left:8px;transform:none}
+}
+@media (max-width:369px){
+  .floatTools{gap:4px;padding:4px}
+  .floatTools .round,.floatTools .segTall{width:44px;min-width:44px;padding:0}
+  .floatTools .zoom{max-width:92px;padding:0 4px}
+  .libInner{padding-left:12px;padding-right:12px}
+  .tabs{margin:0 -12px;padding:0 12px 2px}
+}
+@media (max-width:299px){.grid{grid-template-columns:minmax(0,1fr)}}

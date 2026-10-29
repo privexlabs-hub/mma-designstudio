@@ -12,7 +12,7 @@ export function AnnouncementBanner({ tone = 'cocoa', icon = 'sparkles', children
       {icon && <span style={{ color: t[2], display: 'flex' }}><Icon name={icon} size={16} /></span>}
       <span>{children}</span>
       {actionLabel && <button type="button" onClick={onAction} style={{ background: 'none', border: 'none', color: t[1], fontFamily: 'inherit', fontSize: 14, fontWeight: 800, textDecoration: 'underline', textUnderlineOffset: 3, cursor: 'pointer', padding: 0 }}>{actionLabel}</button>}
-      {onDismiss && <button type="button" aria-label="Dismiss" onClick={onDismiss} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 36, height: 36, border: 'none', background: 'transparent', color: t[1], cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="x" size={16} /></button>}
+      {onDismiss && <button type="button" aria-label="Dismiss" onClick={onDismiss} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 'var(--tap-sm, 36px)', height: 'var(--tap-sm, 36px)', border: 'none', background: 'transparent', color: t[1], cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icon name="x" size={16} /></button>}
     </div>
   );
 }

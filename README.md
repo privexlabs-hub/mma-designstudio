@@ -47,6 +47,29 @@ src/content/brand.ts brand copy, taken from the design-system readme
 reference/prototype/ the original Claude Design files, kept for parity tests
 ```
 
+## Phone first
+
+The users work on small phones, so every screen is built and tested for them first. Desktop with a mouse keeps its compact layout.
+
+- **Sizing.** On touch screens, every field uses at least 16 px text, so iPhone Safari doesn't zoom in when you tap a field. Every button, tab, swatch and link is at least 44 px. Pages fit 320 px wide (iPhone SE first generation, small Androids) without sideways scrolling, in portrait and landscape.
+- **Editor on a phone:**
+  - Tap an element to select it. A bar then offers **Edit text, Duplicate, Forward, Back, Delete, Done**, so no double-tap or hidden menu is needed.
+  - Drag with one finger. Small finger jitters are ignored, so a tap doesn't move the element by accident.
+  - Pinch to zoom and pan the canvas with two fingers.
+  - The Pages and Edit panels are bottom sheets. Tap or swipe the handle to expand, shrink or close them. The selected element scrolls into view above the sheet, and the sheet stays above the on-screen keyboard.
+  - Held sideways, the panels slide in from the right instead.
+  - Position, size and font fields have −/+ buttons, and X/Y fields can take negative numbers on the iPhone keypad.
+- **Downloads on a phone:**
+  - Every export format works.
+  - Big exports are capped under iPhone Safari's 16-megapixel canvas limit, so they don't fail. The Export panel shows the real output size and says when it was reduced.
+  - On phones that support it, **Share PNG / JPG / PDF** opens the native share sheet (WhatsApp, Instagram, Save to Photos or Files).
+- **Tests.** Run `npm run e2e:devices` with a server running. It covers:
+  - layout, 16 px fields and 44 px targets on iPhone SE, iPhone 15, iPhone 15 Pro Max, Galaxy S9+, Galaxy S24, Galaxy A55, Pixel 7 and two landscape phones
+  - touch editing, phone downloads and sharing
+  - a sweep that opens and edits every template on a phone
+
+  By default it runs in Chromium with real device profiles. For Safari's engine, install WebKit's system libraries once (`sudo npx playwright install-deps webkit`), then add `--webkit`.
+
 ## Added after the prototype: platform posts
 
 A **Platform posts** library tab holds the 16-design post set (the same designs as Square post) on each platform's feed formats. That is 112 templates:

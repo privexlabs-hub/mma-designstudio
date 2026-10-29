@@ -8,6 +8,8 @@ export function EditorTools({ app, floating }: { app: Studio; floating?: boolean
   const st = app.state, d = st.doc; if (!d) return null;
   const z = app.zoom();
   const opts = [{ v: 'fit', l: 'Fit (' + Math.round(z * 100) + '%)' }].concat([0.25, 0.5, 0.75, 1, 1.5].map((x) => ({ v: String(x), l: x * 100 + '%' })));
+  // A pinch-zoom level isn't one of the presets: list it so the menu shows the real zoom.
+  if (st.zoomMode !== 'fit' && !opts.some((o) => o.v === String(st.zoomMode))) opts.splice(1, 0, { v: String(st.zoomMode), l: Math.round(z * 100) + '%' });
   return (
     <div className={floating ? s.floatTools : s.tools}>
       {!floating && st.vw >= 1150 && <span className={s.docName}>{d.name}</span>}

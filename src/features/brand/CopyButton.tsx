@@ -14,5 +14,5 @@ export function CopyButton({ text, label = 'Copy' }: { text: string; label?: str
     }
     setDone(true); setTimeout(() => setDone(false), 1600);
   };
-  return <button type="button" className={p.btn} onClick={copy} aria-label={done ? 'Copied' : label + ': ' + text.slice(0, 40)} style={{ minHeight: 36, padding: '0 12px', fontSize: 13 }}><Icon name={done ? 'check' : 'copy'} size={14} />{done ? 'Copied' : label}</button>;
+  return <button type="button" className={`${p.btn} ${p.btnSm}`} onClick={copy} aria-label={done ? 'Copied' : label + ': ' + text.slice(0, 40)} style={{ padding: '0 12px', fontSize: 13 }}><Icon name={done ? 'check' : 'copy'} size={14} />{done ? 'Copied' : label}</button>;
 }
